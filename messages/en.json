@@ -21,6 +21,7 @@
     "home": "Home",
     "listings": "Listings",
     "offer": "Offer Help",
+    "map": "Map",
     "hotlines": "Hotlines",
     "resources": "Resources",
     "admin": "Municipality"
@@ -80,7 +81,10 @@
     "description": "Additional description",
     "descriptionPlaceholder": "e.g. 2 rooms available, families preferred",
     "submitOffer": "Post Listing",
-    "phoneDisclaimer": "Your phone number will be visible to people looking for help. We do not collect any other personal data."
+    "phoneDisclaimer": "Your phone number will be visible to people looking for help. We do not collect any other personal data.",
+    "location": "Pin location on map",
+    "locationHelper": "Click on the map to mark the exact location (optional)",
+    "clearPin": "Clear pin"
   },
   "offerSuccess": {
     "title": "Your listing has been posted!",
@@ -136,6 +140,18 @@
     "reasonPlaceholder": "e.g. Incorrect information",
     "submit": "Submit Report",
     "success": "Report submitted. Thank you for helping."
+  },
+  "map": {
+    "title": "Map View",
+    "loading": "Loading map...",
+    "viewDetails": "View details",
+    "getDirections": "Get directions",
+    "approximateLocation": "Approximate location",
+    "verified": "Verified",
+    "legendShelter": "Shelter",
+    "legendFood": "Food",
+    "legendAppliances": "Appliances",
+    "legendClothing": "Clothing"
   },
   "regions": {
     "mount_lebanon": "Mount Lebanon",

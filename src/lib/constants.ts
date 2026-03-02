@@ -87,6 +87,20 @@ export const GOVERNMENT_HOTLINES: RegionHotline[] = [
   },
 ];
 
+export const REGION_CENTERS: Record<Region, [number, number]> = {
+  beirut: [33.8938, 35.5018],
+  mount_lebanon: [33.8100, 35.5900],
+  north_lebanon: [34.4367, 35.8497],
+  akkar: [34.5294, 36.0781],
+  bekaa: [33.8463, 35.9019],
+  baalbek_hermel: [34.0047, 36.2110],
+  south_lebanon: [33.3750, 35.4856],
+  nabatieh: [33.3772, 35.4836],
+};
+
+export const LEBANON_CENTER: [number, number] = [33.8547, 35.8623];
+export const LEBANON_DEFAULT_ZOOM = 9;
+
 export const LISTING_STATUSES = ["available", "limited", "full"] as const;
 
 export const LISTING_CATEGORIES: ListingCategory[] = [

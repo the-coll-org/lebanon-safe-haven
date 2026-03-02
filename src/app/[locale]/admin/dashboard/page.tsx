@@ -48,21 +48,6 @@ export default function AdminDashboardPage() {
 
   const isSuperadmin = adminRole === "superadmin";
 
-  useEffect(() => {
-    fetchAdmin();
-  }, []);
-
-  async function fetchAdmin() {
-    const res = await fetch("/api/admin/me");
-    if (res.ok) {
-      const data = await res.json();
-      setAdminRegion(data.region);
-      setAdminRole(data.role || "municipality");
-      setAdminName(data.name);
-      fetchListings(data.role === "superadmin" ? undefined : data.region);
-    }
-  }
-
   async function fetchListings(region?: string) {
     setLoading(true);
     const params = region ? `?region=${region}` : "";
@@ -91,6 +76,27 @@ export default function AdminDashboardPage() {
     await fetch("/api/admin/auth", { method: "DELETE" });
     router.push("/admin/login");
   }
+
+  useEffect(() => {
+    let ignore = false;
+    async function init() {
+      const res = await fetch("/api/admin/me");
+      if (!res.ok || ignore) return;
+      const data = await res.json();
+      setAdminRegion(data.region);
+      setAdminRole(data.role || "municipality");
+      setAdminName(data.name);
+      const region = data.role === "superadmin" ? undefined : data.region;
+      const params = region ? `?region=${region}` : "";
+      const listingsRes = await fetch(`/api/listings${params}`);
+      if (listingsRes.ok && !ignore) {
+        setListings(await listingsRes.json());
+      }
+      if (!ignore) setLoading(false);
+    }
+    init();
+    return () => { ignore = true; };
+  }, []);
 
   const searchLower = search.toLowerCase();
   const matchesSearch = (l: Listing) =>

@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
       return { ...listing, phone: decryptPhone(listing.phone) };
     }
     // Strip phone + editToken from public responses
-    const { phone, editToken, ...safe } = listing;
+    const { phone, editToken, ...safe } = listing; // eslint-disable-line @typescript-eslint/no-unused-vars
     return safe;
   });
 
@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
   if (limited) return limited;
 
   const body = await request.json();
-  const { phone, region, area, capacity, description, category } = body;
+  const { phone, region, area, capacity, description, category, latitude, longitude } = body;
 
   if (!phone || !region || !capacity) {
     return NextResponse.json(
@@ -115,6 +115,22 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  // Validate coordinates if provided (Lebanon bounding box)
+  let validLat: number | null = null;
+  let validLng: number | null = null;
+  if (latitude != null && longitude != null) {
+    const lat = Number(latitude);
+    const lng = Number(longitude);
+    if (
+      !isNaN(lat) && !isNaN(lng) &&
+      lat >= 33.0 && lat <= 34.7 &&
+      lng >= 35.0 && lng <= 36.7
+    ) {
+      validLat = lat;
+      validLng = lng;
+    }
+  }
+
   const id = uuid();
   const editToken = uuid();
   const now = new Date().toISOString();
@@ -132,6 +148,8 @@ export async function POST(request: NextRequest) {
     verified: false,
     verifiedBy: null,
     flagCount: 0,
+    latitude: validLat,
+    longitude: validLng,
     createdAt: now,
     updatedAt: now,
   };

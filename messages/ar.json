@@ -21,6 +21,7 @@
     "home": "الرئيسية",
     "listings": "الإعلانات",
     "offer": "أريد المساعدة",
+    "map": "الخريطة",
     "hotlines": "خطوط الطوارئ",
     "resources": "موارد",
     "admin": "البلدية"
@@ -80,7 +81,10 @@
     "description": "وصف إضافي",
     "descriptionPlaceholder": "مثال: غرفتان متاحتان، يُفضّل عائلات",
     "submitOffer": "نشر الإعلان",
-    "phoneDisclaimer": "سيظهر رقم هاتفك للباحثين عن مساعدة. لا نجمع أي بيانات شخصية أخرى."
+    "phoneDisclaimer": "سيظهر رقم هاتفك للباحثين عن مساعدة. لا نجمع أي بيانات شخصية أخرى.",
+    "location": "حدّد الموقع على الخريطة",
+    "locationHelper": "انقر على الخريطة لتحديد الموقع الدقيق (اختياري)",
+    "clearPin": "إزالة العلامة"
   },
   "offerSuccess": {
     "title": "تم نشر إعلانك بنجاح!",
@@ -136,6 +140,18 @@
     "reasonPlaceholder": "مثال: معلومات غير صحيحة",
     "submit": "إرسال البلاغ",
     "success": "تم إرسال البلاغ. شكراً لمساعدتنا."
+  },
+  "map": {
+    "title": "عرض الخريطة",
+    "loading": "جاري تحميل الخريطة...",
+    "viewDetails": "عرض التفاصيل",
+    "getDirections": "الاتجاهات",
+    "approximateLocation": "موقع تقريبي",
+    "verified": "موثّق",
+    "legendShelter": "مأوى",
+    "legendFood": "طعام",
+    "legendAppliances": "أجهزة",
+    "legendClothing": "ملابس"
   },
   "regions": {
     "mount_lebanon": "جبل لبنان",

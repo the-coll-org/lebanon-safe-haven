@@ -15,8 +15,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { REGION_LIST, LISTING_CATEGORIES } from "@/lib/constants";
+import { MapPicker } from "./map-picker";
 import { Disclaimer } from "./disclaimer";
-import { Home, UtensilsCrossed, Plug, Shirt } from "lucide-react";
+import { Home, UtensilsCrossed, Plug, Shirt, X } from "lucide-react";
+import type { Region } from "@/types";
 
 const categoryIcons: Record<string, typeof Home> = {
   shelter: Home,
@@ -38,6 +40,7 @@ export function OfferForm() {
   const [area, setArea] = useState("");
   const [capacity, setCapacity] = useState("");
   const [description, setDescription] = useState("");
+  const [coords, setCoords] = useState<[number, number] | null>(null);
 
   const capacityLabel =
     category === "shelter"
@@ -61,6 +64,8 @@ export function OfferForm() {
           area: area || null,
           capacity: Number(capacity),
           description: description || null,
+          latitude: coords ? coords[0] : null,
+          longitude: coords ? coords[1] : null,
         }),
       });
 
@@ -103,9 +108,14 @@ export function OfferForm() {
           id="phone"
           type="tel"
           dir="ltr"
+          inputMode="numeric"
+          maxLength={15}
           placeholder={t("phonePlaceholder")}
           value={phone}
-          onChange={(e) => setPhone(e.target.value)}
+          onChange={(e) => {
+            const digits = e.target.value.replace(/\D/g, "");
+            setPhone(digits);
+          }}
           required
         />
         <p className="text-xs text-muted-foreground">{t("phoneDisclaimer")}</p>
@@ -125,6 +135,27 @@ export function OfferForm() {
             ))}
           </SelectContent>
         </Select>
+      </div>
+
+      <div className="space-y-2">
+        <Label>{t("location")}</Label>
+        <p className="text-xs text-muted-foreground">{t("locationHelper")}</p>
+        <MapPicker
+          value={coords}
+          onChange={setCoords}
+          region={region ? (region as Region) : undefined}
+        />
+        {coords && (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setCoords(null)}
+          >
+            <X className="h-3 w-3 me-1" />
+            {t("clearPin")}
+          </Button>
+        )}
       </div>
 
       <div className="space-y-2">
