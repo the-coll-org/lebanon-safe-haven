@@ -1,0 +1,120 @@
+{
+  "common": {
+    "appName": "Safe Haven",
+    "tagline": "Connecting displaced people with available shelter",
+    "disclaimer": "Safe Haven facilitates connections only. We do not vet individuals, guarantee safety, or assume liability. Always exercise caution.",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "back": "Back",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "call": "Call",
+    "whatsapp": "WhatsApp",
+    "share": "Share",
+    "copiedLink": "Link copied",
+    "verified": "Verified",
+    "flag": "Report",
+    "close": "Close"
+  },
+  "nav": {
+    "home": "Home",
+    "listings": "Shelters",
+    "offer": "Offer Space",
+    "hotlines": "Hotlines",
+    "resources": "Resources",
+    "admin": "Municipality"
+  },
+  "home": {
+    "heroTitle": "Need Shelter?",
+    "heroSubtitle": "Find available shelter spaces in your area",
+    "needShelter": "I Need Shelter",
+    "haveShelter": "I Have Space",
+    "emergencyHotlines": "Government Emergency Hotlines",
+    "viewAllHotlines": "View all numbers",
+    "recentListings": "Recent Available Spaces",
+    "viewAllListings": "View all"
+  },
+  "listings": {
+    "title": "Available Shelter Spaces",
+    "filterByRegion": "Filter by region",
+    "allRegions": "All regions",
+    "noListings": "No spaces currently available in this region",
+    "capacity": "Capacity",
+    "people": "people",
+    "person": "person",
+    "postedOn": "Posted on",
+    "status": "Status",
+    "available": "Available",
+    "limited": "Limited",
+    "full": "Full"
+  },
+  "offer": {
+    "title": "I Have Space Available",
+    "subtitle": "Help displaced people by offering shelter space",
+    "phone": "Phone Number",
+    "phonePlaceholder": "e.g. 03-123456",
+    "region": "Region",
+    "selectRegion": "Select region",
+    "area": "Neighborhood / Area",
+    "areaPlaceholder": "e.g. Ashrafieh",
+    "capacity": "How many people can you host?",
+    "description": "Additional description",
+    "descriptionPlaceholder": "e.g. 2 rooms available, families preferred",
+    "submitOffer": "Post Space",
+    "phoneDisclaimer": "Your phone number will be visible to people looking for shelter. We do not collect any other personal data."
+  },
+  "offerSuccess": {
+    "title": "Your space has been posted!",
+    "subtitle": "Thank you for helping. You can update or remove your listing later using the link below.",
+    "editLink": "Edit Link",
+    "editLinkNote": "Save this link — you'll need it to edit or remove your listing.",
+    "viewListing": "View Listing",
+    "backHome": "Back to Home"
+  },
+  "hotlines": {
+    "title": "Government Emergency Hotlines",
+    "subtitle": "Shelter center numbers from the Disaster Risk Management Unit",
+    "tapToCall": "Tap to call"
+  },
+  "resources": {
+    "title": "Helpful Resources",
+    "subtitle": "Organizations and agencies that can help",
+    "unhcr": "UNHCR Lebanon",
+    "redCross": "Lebanese Red Cross",
+    "unicef": "UNICEF Lebanon",
+    "caritas": "Caritas Lebanon",
+    "visitWebsite": "Visit Website"
+  },
+  "admin": {
+    "loginTitle": "Municipality Login",
+    "username": "Username",
+    "password": "Password",
+    "login": "Sign In",
+    "loginError": "Invalid username or password",
+    "dashboard": "Dashboard",
+    "pendingListings": "Listings pending verification",
+    "flaggedListings": "Flagged listings",
+    "verifyListing": "Verify",
+    "removeListing": "Remove",
+    "logout": "Sign Out",
+    "noListings": "No listings pending verification",
+    "verified": "Verified"
+  },
+  "flag": {
+    "title": "Report this listing",
+    "reason": "Reason for reporting (optional)",
+    "reasonPlaceholder": "e.g. Incorrect information",
+    "submit": "Submit Report",
+    "success": "Report submitted. Thank you for helping."
+  },
+  "regions": {
+    "mount_lebanon": "Mount Lebanon",
+    "beirut": "Beirut",
+    "south_lebanon": "South Lebanon",
+    "nabatieh": "Nabatieh",
+    "bekaa": "Bekaa",
+    "baalbek_hermel": "Baalbek-Hermel",
+    "akkar": "Akkar",
+    "north_lebanon": "North Lebanon"
+  }
+}

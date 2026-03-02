@@ -1,0 +1,70 @@
+import Database from "better-sqlite3";
+import { drizzle } from "drizzle-orm/better-sqlite3";
+import { municipalities } from "./schema";
+import bcrypt from "bcryptjs";
+import { v4 as uuid } from "uuid";
+import crypto from "crypto";
+
+const sqlite = new Database("./sqlite.db");
+const db = drizzle(sqlite);
+
+function generatePassword(): string {
+  return crypto.randomBytes(12).toString("base64url");
+}
+
+async function seed() {
+  console.log("Seeding database...\n");
+
+  // Super-admin (platform-wide, not tied to a specific region)
+  const superAdminPassword = generatePassword();
+  const superAdminHash = await bcrypt.hash(superAdminPassword, 10);
+  db.insert(municipalities)
+    .values({
+      id: uuid(),
+      name: "Platform Admin",
+      region: "beirut", // placeholder
+      username: "admin",
+      passwordHash: superAdminHash,
+      createdAt: new Date().toISOString(),
+    })
+    .run();
+  console.log(`  Super admin created:`);
+  console.log(`    Username: admin`);
+  console.log(`    Password: ${superAdminPassword}`);
+  console.log();
+
+  // Municipality accounts — one per region
+  const demoMunicipalities = [
+    { name: "بلدية بيروت", region: "beirut", username: "beirut_admin" },
+    { name: "بلدية جبل لبنان", region: "mount_lebanon", username: "mount_lebanon_admin" },
+    { name: "بلدية الجنوب", region: "south_lebanon", username: "south_lebanon_admin" },
+    { name: "بلدية النبطية", region: "nabatieh", username: "nabatieh_admin" },
+    { name: "بلدية البقاع", region: "bekaa", username: "bekaa_admin" },
+    { name: "بلدية بعلبك", region: "baalbek_hermel", username: "baalbek_admin" },
+    { name: "بلدية عكار", region: "akkar", username: "akkar_admin" },
+    { name: "بلدية الشمال", region: "north_lebanon", username: "north_admin" },
+  ];
+
+  console.log("  Municipality accounts:");
+  for (const m of demoMunicipalities) {
+    const password = generatePassword();
+    const passwordHash = await bcrypt.hash(password, 10);
+    db.insert(municipalities)
+      .values({
+        id: uuid(),
+        name: m.name,
+        region: m.region,
+        username: m.username,
+        passwordHash,
+        createdAt: new Date().toISOString(),
+      })
+      .run();
+    console.log(`    ${m.username} / ${password}`);
+  }
+
+  console.log("\n  ⚠  SAVE THESE PASSWORDS — they cannot be recovered!\n");
+  console.log("Seed complete!");
+  sqlite.close();
+}
+
+seed().catch(console.error);
