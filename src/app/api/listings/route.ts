@@ -1,17 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { listings } from "@/db/schema";
-import { desc, eq, and } from "drizzle-orm";
+import { desc, eq, and, lt } from "drizzle-orm";
 import { v4 as uuid } from "uuid";
 import { REGION_LIST, LISTING_CATEGORIES } from "@/lib/constants";
 import { rateLimit } from "@/lib/rate-limit";
 import { validateOrigin } from "@/lib/csrf";
+import { encryptPhone, decryptPhone } from "@/lib/crypto";
+import { getSession } from "@/lib/auth";
 import type { Region, ListingCategory } from "@/types";
 
 // Phone: Lebanese numbers only — digits, spaces, dashes, slashes, optional leading +
 const PHONE_REGEX = /^\+?[\d\s\-/]{7,20}$/;
 
+// Auto-expire listings older than 30 days
+function cleanupExpired() {
+  const cutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+  db.delete(listings).where(lt(listings.createdAt, cutoff)).run();
+}
+
 export async function GET(request: NextRequest) {
+  // Periodically clean up old listings
+  cleanupExpired();
+
   const { searchParams } = request.nextUrl;
   const region = searchParams.get("region") as Region | null;
   const category = searchParams.get("category") as ListingCategory | null;
@@ -36,7 +47,19 @@ export async function GET(request: NextRequest) {
   }
 
   const results = await query.all();
-  return NextResponse.json(results);
+
+  // Admin sees full data (decrypted phone); public gets no phone
+  const session = await getSession();
+  const mapped = results.map((listing) => {
+    if (session) {
+      return { ...listing, phone: decryptPhone(listing.phone) };
+    }
+    // Strip phone + editToken from public responses
+    const { phone, editToken, ...safe } = listing;
+    return safe;
+  });
+
+  return NextResponse.json(mapped);
 }
 
 export async function POST(request: NextRequest) {
@@ -98,7 +121,7 @@ export async function POST(request: NextRequest) {
 
   const listing = {
     id,
-    phone: cleanPhone,
+    phone: encryptPhone(cleanPhone),
     region,
     category: cat,
     area: area ? String(area).slice(0, 200).trim() : null,

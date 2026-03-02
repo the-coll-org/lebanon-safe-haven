@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { listings } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { validateOrigin } from "@/lib/csrf";
+import { decryptPhone } from "@/lib/crypto";
 
 export async function GET(
   _request: NextRequest,
@@ -15,7 +16,9 @@ export async function GET(
     return NextResponse.json({ error: "Listing not found" }, { status: 404 });
   }
 
-  return NextResponse.json(listing);
+  // Decrypt phone, strip editToken from public response
+  const { editToken, ...safe } = listing;
+  return NextResponse.json({ ...safe, phone: decryptPhone(listing.phone) });
 }
 
 export async function PATCH(

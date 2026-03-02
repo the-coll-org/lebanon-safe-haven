@@ -5,6 +5,7 @@ import { eq } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
 import { validateOrigin } from "@/lib/csrf";
 import { REGION_LIST, LISTING_CATEGORIES, LISTING_STATUSES } from "@/lib/constants";
+import { encryptPhone } from "@/lib/crypto";
 
 const PHONE_REGEX = /^\+?[\d\s\-/]{7,20}$/;
 
@@ -42,7 +43,7 @@ export async function PATCH(
     if (!PHONE_REGEX.test(cleanPhone)) {
       return NextResponse.json({ error: "Invalid phone number" }, { status: 400 });
     }
-    updates.phone = cleanPhone;
+    updates.phone = encryptPhone(cleanPhone);
   }
 
   if (body.region !== undefined) {

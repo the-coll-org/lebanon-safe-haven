@@ -4,6 +4,7 @@ import { listings } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
 import { validateOrigin } from "@/lib/csrf";
+import { encryptPhone } from "@/lib/crypto";
 
 const PHONE_REGEX = /^\+?[\d\s\-/]{7,20}$/;
 
@@ -50,7 +51,7 @@ export async function PATCH(
 
   db.update(listings)
     .set({
-      phone: cleanPhone,
+      phone: encryptPhone(cleanPhone),
       updatedAt: new Date().toISOString(),
     })
     .where(eq(listings.id, id))
