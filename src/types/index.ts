@@ -10,10 +10,13 @@ export type Region =
 
 export type ListingStatus = "available" | "limited" | "full";
 
+export type ListingCategory = "shelter" | "food" | "appliances";
+
 export interface Listing {
   id: string;
   phone: string;
   region: Region;
+  category: ListingCategory;
   area: string | null;
   capacity: number;
   description: string | null;
@@ -26,10 +29,13 @@ export interface Listing {
   updatedAt: string;
 }
 
+export type AdminRole = "superadmin" | "municipality";
+
 export interface Municipality {
   id: string;
   name: string;
   region: Region;
+  role: AdminRole;
   username: string;
   createdAt: string;
 }

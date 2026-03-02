@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { listings } from "@/db/schema";
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, and } from "drizzle-orm";
 import { v4 as uuid } from "uuid";
-import { REGION_LIST } from "@/lib/constants";
+import { REGION_LIST, LISTING_CATEGORIES } from "@/lib/constants";
 import { rateLimit } from "@/lib/rate-limit";
 import { validateOrigin } from "@/lib/csrf";
-import type { Region } from "@/types";
+import type { Region, ListingCategory } from "@/types";
 
 // Phone: Lebanese numbers only — digits, spaces, dashes, slashes, optional leading +
 const PHONE_REGEX = /^\+?[\d\s\-/]{7,20}$/;
@@ -14,14 +14,25 @@ const PHONE_REGEX = /^\+?[\d\s\-/]{7,20}$/;
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
   const region = searchParams.get("region") as Region | null;
+  const category = searchParams.get("category") as ListingCategory | null;
+
+  const conditions = [];
+  if (region && REGION_LIST.includes(region)) {
+    conditions.push(eq(listings.region, region));
+  }
+  if (category && LISTING_CATEGORIES.includes(category)) {
+    conditions.push(eq(listings.category, category));
+  }
 
   let query = db
     .select()
     .from(listings)
     .orderBy(desc(listings.createdAt));
 
-  if (region && REGION_LIST.includes(region)) {
-    query = query.where(eq(listings.region, region)) as typeof query;
+  if (conditions.length === 1) {
+    query = query.where(conditions[0]) as typeof query;
+  } else if (conditions.length === 2) {
+    query = query.where(and(conditions[0], conditions[1])) as typeof query;
   }
 
   const results = await query.all();
@@ -41,7 +52,7 @@ export async function POST(request: NextRequest) {
   if (limited) return limited;
 
   const body = await request.json();
-  const { phone, region, area, capacity, description } = body;
+  const { phone, region, area, capacity, description, category } = body;
 
   if (!phone || !region || !capacity) {
     return NextResponse.json(
@@ -65,6 +76,14 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  const cat = category || "shelter";
+  if (!LISTING_CATEGORIES.includes(cat)) {
+    return NextResponse.json(
+      { error: "Invalid category" },
+      { status: 400 }
+    );
+  }
+
   const cap = Number(capacity);
   if (!Number.isInteger(cap) || cap < 1 || cap > 10000) {
     return NextResponse.json(
@@ -81,6 +100,7 @@ export async function POST(request: NextRequest) {
     id,
     phone: cleanPhone,
     region,
+    category: cat,
     area: area ? String(area).slice(0, 200).trim() : null,
     capacity: cap,
     description: description ? String(description).slice(0, 1000).trim() : null,

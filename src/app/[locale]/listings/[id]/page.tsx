@@ -8,16 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { ShareButton } from "@/components/share-button";
+import { FlagButton } from "@/components/flag-button";
 import { Disclaimer } from "@/components/disclaimer";
 import {
   Phone,
@@ -25,9 +17,11 @@ import {
   Users,
   MapPin,
   BadgeCheck,
-  Flag,
   ArrowLeft,
   ArrowRight,
+  Home,
+  UtensilsCrossed,
+  Refrigerator,
 } from "lucide-react";
 import type { Listing } from "@/types";
 
@@ -40,19 +34,22 @@ function formatPhoneForCall(phone: string): string {
   return phone.replace(/[\s]/g, "");
 }
 
+const categoryIcons: Record<string, typeof Home> = {
+  shelter: Home,
+  food: UtensilsCrossed,
+  appliances: Refrigerator,
+};
+
 export default function ListingDetailPage() {
   const params = useParams();
   const locale = useLocale();
   const t = useTranslations("listings");
   const tc = useTranslations("common");
-  const tf = useTranslations("flag");
   const tr = useTranslations("regions");
+  const tcat = useTranslations("categories");
 
   const [listing, setListing] = useState<Listing | null>(null);
   const [loading, setLoading] = useState(true);
-  const [flagReason, setFlagReason] = useState("");
-  const [flagSubmitted, setFlagSubmitted] = useState(false);
-  const [flagDialogOpen, setFlagDialogOpen] = useState(false);
 
   const BackArrow = locale === "ar" ? ArrowRight : ArrowLeft;
 
@@ -66,15 +63,6 @@ export default function ListingDetailPage() {
     }
     fetchListing();
   }, [params.id]);
-
-  async function handleFlag() {
-    await fetch(`/api/listings/${params.id}/flag`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ reason: flagReason || null }),
-    });
-    setFlagSubmitted(true);
-  }
 
   if (loading) {
     return (
@@ -108,6 +96,17 @@ export default function ListingDetailPage() {
       full: "destructive",
     };
 
+  const CategoryIcon = categoryIcons[listing.category] || Home;
+
+  const unitSingular =
+    listing.category === "food" ? t("meal")
+    : listing.category === "appliances" ? t("item")
+    : t("person");
+  const unitPlural =
+    listing.category === "food" ? t("meals")
+    : listing.category === "appliances" ? t("items")
+    : t("people");
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-lg">
       <Button variant="ghost" size="sm" className="mb-4 gap-1" asChild>
@@ -131,7 +130,11 @@ export default function ListingDetailPage() {
                 )}
               </div>
             </CardTitle>
-            <div className="flex gap-1.5 shrink-0">
+            <div className="flex gap-1.5 shrink-0 flex-wrap">
+              <Badge variant="outline" className="gap-1">
+                <CategoryIcon className="h-3 w-3" />
+                {tcat(listing.category)}
+              </Badge>
               {listing.verified && (
                 <Badge className="bg-blue-600 hover:bg-blue-700 gap-1">
                   <BadgeCheck className="h-3 w-3" />
@@ -149,7 +152,7 @@ export default function ListingDetailPage() {
             <Users className="h-4 w-4 text-muted-foreground" />
             <span>
               {t("capacity")}: {listing.capacity}{" "}
-              {listing.capacity === 1 ? t("person") : t("people")}
+              {listing.capacity === 1 ? unitSingular : unitPlural}
             </span>
           </div>
 
@@ -189,39 +192,7 @@ export default function ListingDetailPage() {
           {/* Actions row */}
           <div className="flex gap-2">
             <ShareButton />
-            <Dialog open={flagDialogOpen} onOpenChange={setFlagDialogOpen}>
-              <DialogTrigger asChild>
-                <Button variant="ghost" size="sm" className="gap-1 text-muted-foreground">
-                  <Flag className="h-3.5 w-3.5" />
-                  {tc("flag")}
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>{tf("title")}</DialogTitle>
-                </DialogHeader>
-                {flagSubmitted ? (
-                  <p className="text-sm text-muted-foreground py-4">
-                    {tf("success")}
-                  </p>
-                ) : (
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label>{tf("reason")}</Label>
-                      <Textarea
-                        placeholder={tf("reasonPlaceholder")}
-                        value={flagReason}
-                        onChange={(e) => setFlagReason(e.target.value)}
-                        rows={3}
-                      />
-                    </div>
-                    <Button onClick={handleFlag} className="w-full">
-                      {tf("submit")}
-                    </Button>
-                  </div>
-                )}
-              </DialogContent>
-            </Dialog>
+            <FlagButton listingId={listing.id} />
           </div>
 
           <Disclaimer />

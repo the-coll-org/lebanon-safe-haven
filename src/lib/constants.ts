@@ -1,4 +1,4 @@
-import type { Region, RegionHotline } from "@/types";
+import type { Region, RegionHotline, ListingCategory } from "@/types";
 
 export const REGIONS: Record<Region, { ar: string; en: string }> = {
   mount_lebanon: { ar: "جبل لبنان", en: "Mount Lebanon" },
@@ -88,3 +88,11 @@ export const GOVERNMENT_HOTLINES: RegionHotline[] = [
 ];
 
 export const LISTING_STATUSES = ["available", "limited", "full"] as const;
+
+export const LISTING_CATEGORIES: ListingCategory[] = [
+  "shelter",
+  "food",
+  "appliances",
+];
+
+export const CATEGORY_LIST = LISTING_CATEGORIES;

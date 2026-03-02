@@ -14,20 +14,36 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { REGION_LIST } from "@/lib/constants";
+import { REGION_LIST, LISTING_CATEGORIES } from "@/lib/constants";
 import { Disclaimer } from "./disclaimer";
+import { Home, UtensilsCrossed, Refrigerator } from "lucide-react";
+
+const categoryIcons: Record<string, typeof Home> = {
+  shelter: Home,
+  food: UtensilsCrossed,
+  appliances: Refrigerator,
+};
 
 export function OfferForm() {
   const t = useTranslations("offer");
   const tr = useTranslations("regions");
+  const tcat = useTranslations("categories");
   const router = useRouter();
 
   const [loading, setLoading] = useState(false);
   const [phone, setPhone] = useState("");
   const [region, setRegion] = useState("");
+  const [category, setCategory] = useState("shelter");
   const [area, setArea] = useState("");
   const [capacity, setCapacity] = useState("");
   const [description, setDescription] = useState("");
+
+  const capacityLabel =
+    category === "shelter"
+      ? t("capacityPeople")
+      : category === "food"
+        ? t("capacityMeals")
+        : t("capacityItems");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -40,6 +56,7 @@ export function OfferForm() {
         body: JSON.stringify({
           phone,
           region,
+          category,
           area: area || null,
           capacity: Number(capacity),
           description: description || null,
@@ -57,6 +74,28 @@ export function OfferForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
+      <div className="space-y-2">
+        <Label htmlFor="category">{t("category")} *</Label>
+        <Select value={category} onValueChange={setCategory} required>
+          <SelectTrigger id="category">
+            <SelectValue placeholder={t("selectCategory")} />
+          </SelectTrigger>
+          <SelectContent>
+            {LISTING_CATEGORIES.map((c) => {
+              const Icon = categoryIcons[c] || Home;
+              return (
+                <SelectItem key={c} value={c}>
+                  <span className="flex items-center gap-2">
+                    <Icon className="h-4 w-4" />
+                    {tcat(c)}
+                  </span>
+                </SelectItem>
+              );
+            })}
+          </SelectContent>
+        </Select>
+      </div>
+
       <div className="space-y-2">
         <Label htmlFor="phone">{t("phone")} *</Label>
         <Input
@@ -98,7 +137,7 @@ export function OfferForm() {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="capacity">{t("capacity")} *</Label>
+        <Label htmlFor="capacity">{capacityLabel} *</Label>
         <Input
           id="capacity"
           type="number"

@@ -8,28 +8,27 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { REGION_LIST } from "@/lib/constants";
-import type { Region } from "@/types";
+import { LISTING_CATEGORIES } from "@/lib/constants";
 
-interface RegionFilterProps {
+interface CategoryFilterProps {
   value: string;
   onChange: (value: string) => void;
 }
 
-export function RegionFilter({ value, onChange }: RegionFilterProps) {
+export function CategoryFilter({ value, onChange }: CategoryFilterProps) {
   const t = useTranslations("listings");
-  const tr = useTranslations("regions");
+  const tcat = useTranslations("categories");
 
   return (
     <Select value={value} onValueChange={onChange}>
       <SelectTrigger className="w-full">
-        <SelectValue placeholder={t("filterByRegion")} />
+        <SelectValue placeholder={t("filterByCategory")} />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="all">{t("allRegions")}</SelectItem>
-        {REGION_LIST.map((region) => (
-          <SelectItem key={region} value={region}>
-            {tr(region)}
+        <SelectItem value="all">{t("allCategories")}</SelectItem>
+        {LISTING_CATEGORIES.map((cat) => (
+          <SelectItem key={cat} value={cat}>
+            {tcat(cat)}
           </SelectItem>
         ))}
       </SelectContent>

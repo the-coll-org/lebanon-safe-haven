@@ -107,8 +107,8 @@ export default async function HomePage({
             </Badge>
             <p className="text-sm text-muted-foreground mt-1">
               {locale === "ar"
-                ? "أماكن موثقة من البلديات"
-                : "Municipality verified spaces"}
+                ? "إعلانات موثقة من البلديات"
+                : "Municipality verified listings"}
             </p>
           </div>
           <div className="p-4 rounded-lg bg-muted/50">

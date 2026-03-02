@@ -23,6 +23,7 @@ async function seed() {
       id: uuid(),
       name: "Platform Admin",
       region: "beirut", // placeholder
+      role: "superadmin",
       username: "admin",
       passwordHash: superAdminHash,
       createdAt: new Date().toISOString(),

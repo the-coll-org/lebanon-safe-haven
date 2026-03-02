@@ -3,6 +3,7 @@
 import { Link } from "@/i18n/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { LanguageSwitcher } from "./language-switcher";
+import { AdminBadge } from "./admin-badge";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -45,11 +46,13 @@ export function Header() {
               <Link href={link.href}>{link.label}</Link>
             </Button>
           ))}
+          <AdminBadge />
           <LanguageSwitcher />
         </nav>
 
         {/* Mobile nav */}
         <div className="flex md:hidden items-center gap-2">
+          <AdminBadge />
           <LanguageSwitcher />
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
