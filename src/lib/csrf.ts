@@ -13,7 +13,11 @@ export function validateOrigin(request: NextRequest): NextResponse | null {
 
   try {
     const originHost = new URL(origin).host;
-    const requestHost = request.nextUrl.host;
+
+    // Behind a reverse proxy, nextUrl.host is localhost:3000.
+    // Use the forwarded host header to get the real hostname.
+    const forwardedHost = request.headers.get("x-forwarded-host");
+    const requestHost = forwardedHost || request.nextUrl.host;
 
     if (originHost === requestHost) return null;
   } catch {
