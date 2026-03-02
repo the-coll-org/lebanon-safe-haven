@@ -10,7 +10,7 @@ export type Region =
 
 export type ListingStatus = "available" | "limited" | "full";
 
-export type ListingCategory = "shelter" | "food" | "appliances";
+export type ListingCategory = "shelter" | "food" | "appliances" | "clothing";
 
 export interface Listing {
   id: string;

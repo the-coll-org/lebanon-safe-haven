@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { AdminEditDialog } from "@/components/admin-edit-dialog";
 import {
   BadgeCheck,
   LogOut,
@@ -15,12 +16,10 @@ import {
   Users,
   Phone,
   Flag,
-  Pencil,
-  Check,
-  X,
   Home,
   UtensilsCrossed,
-  Refrigerator,
+  Plug,
+  Shirt,
   Search,
   Trash2,
 } from "lucide-react";
@@ -29,7 +28,8 @@ import type { Listing, Region, AdminRole } from "@/types";
 const categoryIcons: Record<string, typeof Home> = {
   shelter: Home,
   food: UtensilsCrossed,
-  appliances: Refrigerator,
+  appliances: Plug,
+  clothing: Shirt,
 };
 
 export default function AdminDashboardPage() {
@@ -44,8 +44,6 @@ export default function AdminDashboardPage() {
   const [adminRegion, setAdminRegion] = useState<Region | null>(null);
   const [adminRole, setAdminRole] = useState<AdminRole>("municipality");
   const [adminName, setAdminName] = useState("");
-  const [editingPhone, setEditingPhone] = useState<string | null>(null);
-  const [phoneValue, setPhoneValue] = useState("");
   const [search, setSearch] = useState("");
 
   const isSuperadmin = adminRole === "superadmin";
@@ -75,30 +73,18 @@ export default function AdminDashboardPage() {
     setLoading(false);
   }
 
+  function refreshListings() {
+    fetchListings(isSuperadmin ? undefined : adminRegion || undefined);
+  }
+
   async function handleVerify(id: string) {
     const res = await fetch(`/api/admin/listings/${id}/verify`, { method: "PATCH" });
-    if (res.ok) {
-      fetchListings(isSuperadmin ? undefined : adminRegion || undefined);
-    }
+    if (res.ok) refreshListings();
   }
 
   async function handleDelete(id: string) {
     const res = await fetch(`/api/admin/listings/${id}`, { method: "DELETE" });
-    if (res.ok) {
-      fetchListings(isSuperadmin ? undefined : adminRegion || undefined);
-    }
-  }
-
-  async function handlePhoneSave(id: string) {
-    const res = await fetch(`/api/admin/listings/${id}/phone`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ phone: phoneValue }),
-    });
-    if (res.ok) {
-      setEditingPhone(null);
-      fetchListings(isSuperadmin ? undefined : adminRegion || undefined);
-    }
+    if (res.ok) refreshListings();
   }
 
   async function handleLogout() {
@@ -114,8 +100,86 @@ export default function AdminDashboardPage() {
     (l.description && l.description.toLowerCase().includes(searchLower)) ||
     l.category.toLowerCase().includes(searchLower);
 
-  const unverified = listings.filter((l) => !l.verified && matchesSearch(l));
+  const unverified = listings.filter((l) => !l.verified && l.category === "shelter" && matchesSearch(l));
   const flagged = listings.filter((l) => l.flagCount > 0 && matchesSearch(l));
+
+  function renderListingCard(listing: Listing, borderClass?: string) {
+    const CategoryIcon = categoryIcons[listing.category] || Home;
+    return (
+      <Card key={listing.id} className={borderClass}>
+        <CardContent className="p-4">
+          <div className="flex items-start justify-between gap-2">
+            <div className="space-y-1 flex-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <MapPin className="h-4 w-4" />
+                <span className="font-medium">{tr(listing.region)}</span>
+                <Badge variant="outline" className="gap-1 text-xs">
+                  <CategoryIcon className="h-3 w-3" />
+                  {tcat(listing.category)}
+                </Badge>
+                {listing.area && (
+                  <span className="text-sm text-muted-foreground">
+                    - {listing.area}
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-3 text-sm text-muted-foreground flex-wrap">
+                <span className="flex items-center gap-1">
+                  <Users className="h-3.5 w-3.5" />
+                  {listing.capacity}
+                </span>
+                <span className="flex items-center gap-1" dir="ltr">
+                  <Phone className="h-3.5 w-3.5" />
+                  {listing.phone}
+                </span>
+                {listing.flagCount > 0 && (
+                  <span className="flex items-center gap-1 text-destructive">
+                    <Flag className="h-3.5 w-3.5" />
+                    {listing.flagCount}
+                  </span>
+                )}
+                {listing.verified && (
+                  <Badge className="bg-blue-600 gap-1 text-xs">
+                    <BadgeCheck className="h-3 w-3" />
+                    {t("verified")}
+                  </Badge>
+                )}
+              </div>
+              {listing.description && (
+                <p className="text-sm text-muted-foreground line-clamp-1">
+                  {listing.description}
+                </p>
+              )}
+            </div>
+            <div className="flex flex-col gap-1 shrink-0">
+              {!listing.verified && listing.category === "shelter" && (
+                <Button
+                  size="sm"
+                  className="gap-1"
+                  onClick={() => handleVerify(listing.id)}
+                >
+                  <BadgeCheck className="h-3.5 w-3.5" />
+                  {t("verifyListing")}
+                </Button>
+              )}
+              <AdminEditDialog listing={listing} onSaved={refreshListings} />
+              {isSuperadmin && (
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  className="gap-1"
+                  onClick={() => handleDelete(listing.id)}
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  {t("removeListing")}
+                </Button>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">
@@ -160,115 +224,7 @@ export default function AdminDashboardPage() {
           <p className="text-muted-foreground text-sm">{t("noListings")}</p>
         ) : (
           <div className="space-y-3">
-            {unverified.map((listing) => {
-              const CategoryIcon = categoryIcons[listing.category] || Home;
-              return (
-                <Card key={listing.id}>
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="space-y-1 flex-1">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <MapPin className="h-4 w-4" />
-                          <span className="font-medium">
-                            {tr(listing.region)}
-                          </span>
-                          <Badge variant="outline" className="gap-1 text-xs">
-                            <CategoryIcon className="h-3 w-3" />
-                            {tcat(listing.category)}
-                          </Badge>
-                          {listing.area && (
-                            <span className="text-sm text-muted-foreground">
-                              - {listing.area}
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-3 text-sm text-muted-foreground flex-wrap">
-                          <span className="flex items-center gap-1">
-                            <Users className="h-3.5 w-3.5" />
-                            {listing.capacity}
-                          </span>
-                          {editingPhone === listing.id ? (
-                            <span className="flex items-center gap-1" dir="ltr">
-                              <Input
-                                type="tel"
-                                value={phoneValue}
-                                onChange={(e) => setPhoneValue(e.target.value)}
-                                className="h-7 w-36 text-xs"
-                                dir="ltr"
-                              />
-                              <Button
-                                size="icon"
-                                variant="ghost"
-                                className="h-6 w-6"
-                                onClick={() => handlePhoneSave(listing.id)}
-                              >
-                                <Check className="h-3 w-3" />
-                              </Button>
-                              <Button
-                                size="icon"
-                                variant="ghost"
-                                className="h-6 w-6"
-                                onClick={() => setEditingPhone(null)}
-                              >
-                                <X className="h-3 w-3" />
-                              </Button>
-                            </span>
-                          ) : (
-                            <span className="flex items-center gap-1" dir="ltr">
-                              <Phone className="h-3.5 w-3.5" />
-                              {listing.phone}
-                              <Button
-                                size="icon"
-                                variant="ghost"
-                                className="h-5 w-5"
-                                onClick={() => {
-                                  setEditingPhone(listing.id);
-                                  setPhoneValue(listing.phone);
-                                }}
-                              >
-                                <Pencil className="h-3 w-3" />
-                              </Button>
-                            </span>
-                          )}
-                          {listing.flagCount > 0 && (
-                            <span className="flex items-center gap-1 text-destructive">
-                              <Flag className="h-3.5 w-3.5" />
-                              {listing.flagCount}
-                            </span>
-                          )}
-                        </div>
-                        {listing.description && (
-                          <p className="text-sm text-muted-foreground line-clamp-1">
-                            {listing.description}
-                          </p>
-                        )}
-                      </div>
-                      <div className="flex flex-col gap-1 shrink-0">
-                        <Button
-                          size="sm"
-                          className="gap-1"
-                          onClick={() => handleVerify(listing.id)}
-                        >
-                          <BadgeCheck className="h-3.5 w-3.5" />
-                          {t("verifyListing")}
-                        </Button>
-                        {isSuperadmin && (
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            className="gap-1"
-                            onClick={() => handleDelete(listing.id)}
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                            {t("removeListing")}
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
+            {unverified.map((listing) => renderListingCard(listing))}
           </div>
         )}
       </section>
@@ -284,103 +240,9 @@ export default function AdminDashboardPage() {
           <p className="text-muted-foreground text-sm">{t("noFlaggedListings")}</p>
         ) : (
           <div className="space-y-3">
-            {flagged.map((listing) => {
-              const CategoryIcon = categoryIcons[listing.category] || Home;
-              return (
-                <Card key={listing.id} className="border-destructive/30">
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="space-y-1 flex-1">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <MapPin className="h-4 w-4" />
-                          <span className="font-medium">
-                            {tr(listing.region)}
-                          </span>
-                          <Badge variant="outline" className="gap-1 text-xs">
-                            <CategoryIcon className="h-3 w-3" />
-                            {tcat(listing.category)}
-                          </Badge>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm flex-wrap">
-                          <Badge variant="destructive" className="gap-1">
-                            <Flag className="h-3 w-3" />
-                            {listing.flagCount}{" "}
-                            {locale === "ar" ? "بلاغ" : "flags"}
-                          </Badge>
-                          {listing.verified && (
-                            <Badge className="bg-blue-600 gap-1">
-                              <BadgeCheck className="h-3 w-3" />
-                              {t("verified")}
-                            </Badge>
-                          )}
-                        </div>
-                        {listing.description && (
-                          <p className="text-sm text-muted-foreground line-clamp-1">
-                            {listing.description}
-                          </p>
-                        )}
-                      </div>
-                      <div className="flex flex-col items-end gap-1 shrink-0">
-                        {editingPhone === listing.id ? (
-                          <span className="flex items-center gap-1" dir="ltr">
-                            <Input
-                              type="tel"
-                              value={phoneValue}
-                              onChange={(e) => setPhoneValue(e.target.value)}
-                              className="h-7 w-36 text-xs"
-                              dir="ltr"
-                            />
-                            <Button
-                              size="icon"
-                              variant="ghost"
-                              className="h-6 w-6"
-                              onClick={() => handlePhoneSave(listing.id)}
-                            >
-                              <Check className="h-3 w-3" />
-                            </Button>
-                            <Button
-                              size="icon"
-                              variant="ghost"
-                              className="h-6 w-6"
-                              onClick={() => setEditingPhone(null)}
-                            >
-                              <X className="h-3 w-3" />
-                            </Button>
-                          </span>
-                        ) : (
-                          <span className="flex items-center gap-1 text-sm text-muted-foreground" dir="ltr">
-                            <Phone className="h-3.5 w-3.5" />
-                            {listing.phone}
-                            <Button
-                              size="icon"
-                              variant="ghost"
-                              className="h-5 w-5"
-                              onClick={() => {
-                                setEditingPhone(listing.id);
-                                setPhoneValue(listing.phone);
-                              }}
-                            >
-                              <Pencil className="h-3 w-3" />
-                            </Button>
-                          </span>
-                        )}
-                        {isSuperadmin && (
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            className="gap-1"
-                            onClick={() => handleDelete(listing.id)}
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                            {t("removeListing")}
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
+            {flagged.map((listing) =>
+              renderListingCard(listing, "border-destructive/30")
+            )}
           </div>
         )}
       </section>

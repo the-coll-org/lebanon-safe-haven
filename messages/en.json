@@ -58,7 +58,8 @@
   "categories": {
     "shelter": "Shelter",
     "food": "Food",
-    "appliances": "Appliances"
+    "appliances": "Appliances",
+    "clothing": "Clothing"
   },
   "offer": {
     "title": "I Want to Help",
@@ -117,7 +118,16 @@
     "noListings": "No listings pending verification",
     "noFlaggedListings": "No flagged listings",
     "verified": "Verified",
-    "searchPlaceholder": "Search by phone, area, or description..."
+    "searchPlaceholder": "Search by phone, area, or description...",
+    "editListing": "Edit",
+    "saveChanges": "Save Changes",
+    "phone": "Phone",
+    "region": "Region",
+    "category": "Type",
+    "status": "Status",
+    "capacity": "Capacity",
+    "area": "Area",
+    "description": "Description"
   },
   "flag": {
     "title": "Report this listing",

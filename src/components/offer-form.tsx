@@ -16,12 +16,13 @@ import {
 } from "@/components/ui/select";
 import { REGION_LIST, LISTING_CATEGORIES } from "@/lib/constants";
 import { Disclaimer } from "./disclaimer";
-import { Home, UtensilsCrossed, Refrigerator } from "lucide-react";
+import { Home, UtensilsCrossed, Plug, Shirt } from "lucide-react";
 
 const categoryIcons: Record<string, typeof Home> = {
   shelter: Home,
   food: UtensilsCrossed,
-  appliances: Refrigerator,
+  appliances: Plug,
+  clothing: Shirt,
 };
 
 export function OfferForm() {

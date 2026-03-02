@@ -58,7 +58,8 @@
   "categories": {
     "shelter": "مأوى",
     "food": "طعام",
-    "appliances": "أجهزة ومستلزمات"
+    "appliances": "أجهزة ومستلزمات",
+    "clothing": "ملابس"
   },
   "offer": {
     "title": "أريد المساعدة",
@@ -117,7 +118,16 @@
     "noListings": "لا توجد إعلانات بانتظار التوثيق",
     "noFlaggedListings": "لا توجد إعلانات مُبلّغ عنها",
     "verified": "تم التوثيق",
-    "searchPlaceholder": "بحث بالهاتف، المنطقة، أو الوصف..."
+    "searchPlaceholder": "بحث بالهاتف، المنطقة، أو الوصف...",
+    "editListing": "تعديل",
+    "saveChanges": "حفظ التغييرات",
+    "phone": "الهاتف",
+    "region": "المنطقة",
+    "category": "النوع",
+    "status": "الحالة",
+    "capacity": "السعة",
+    "area": "الحي",
+    "description": "الوصف"
   },
   "flag": {
     "title": "الإبلاغ عن هذا الإعلان",

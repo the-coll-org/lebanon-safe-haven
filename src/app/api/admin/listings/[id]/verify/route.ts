@@ -26,6 +26,14 @@ export async function PATCH(
     return NextResponse.json({ error: "Listing not found" }, { status: 404 });
   }
 
+  // Only shelter listings can be verified
+  if (listing.category !== "shelter") {
+    return NextResponse.json(
+      { error: "Only shelter listings can be verified" },
+      { status: 400 }
+    );
+  }
+
   // Superadmins can verify any listing; municipality admins only their region
   if (session.role !== "superadmin" && session.region !== listing.region) {
     return NextResponse.json(

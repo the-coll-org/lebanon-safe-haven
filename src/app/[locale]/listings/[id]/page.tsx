@@ -21,7 +21,8 @@ import {
   ArrowRight,
   Home,
   UtensilsCrossed,
-  Refrigerator,
+  Plug,
+  Shirt,
 } from "lucide-react";
 import type { Listing } from "@/types";
 
@@ -37,7 +38,8 @@ function formatPhoneForCall(phone: string): string {
 const categoryIcons: Record<string, typeof Home> = {
   shelter: Home,
   food: UtensilsCrossed,
-  appliances: Refrigerator,
+  appliances: Plug,
+  clothing: Shirt,
 };
 
 export default function ListingDetailPage() {
@@ -100,11 +102,11 @@ export default function ListingDetailPage() {
 
   const unitSingular =
     listing.category === "food" ? t("meal")
-    : listing.category === "appliances" ? t("item")
-    : t("person");
+    : listing.category === "shelter" ? t("person")
+    : t("item");
   const unitPlural =
     listing.category === "food" ? t("meals")
-    : listing.category === "appliances" ? t("items")
+    : listing.category === "shelter" ? t("people")
     : t("people");
 
   return (

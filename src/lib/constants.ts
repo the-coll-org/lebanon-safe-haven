@@ -93,6 +93,7 @@ export const LISTING_CATEGORIES: ListingCategory[] = [
   "shelter",
   "food",
   "appliances",
+  "clothing",
 ];
 
 export const CATEGORY_LIST = LISTING_CATEGORIES;
