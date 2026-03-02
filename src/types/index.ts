@@ -25,6 +25,8 @@ export interface Listing {
   verified: boolean;
   verifiedBy: string | null;
   flagCount: number;
+  latitude: number | null;
+  longitude: number | null;
   createdAt: string;
   updatedAt: string;
 }

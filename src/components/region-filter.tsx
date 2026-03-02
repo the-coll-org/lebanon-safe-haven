@@ -9,7 +9,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { REGION_LIST } from "@/lib/constants";
-import type { Region } from "@/types";
 
 interface RegionFilterProps {
   value: string;
