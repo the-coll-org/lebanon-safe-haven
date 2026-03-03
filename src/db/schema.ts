@@ -37,3 +37,14 @@ export const flags = sqliteTable("flags", {
   reason: text("reason"),
   createdAt: text("created_at").notNull(),
 });
+
+export const feedback = sqliteTable("feedback", {
+  id: text("id").primaryKey(),
+  name: text("name"),
+  email: text("email"),
+  message: text("message").notNull(),
+  category: text("category").notNull().default("general"),
+  userType: text("user_type").notNull().default("guest"),
+  municipalityId: text("municipality_id").references(() => municipalities.id),
+  createdAt: text("created_at").notNull(),
+});
