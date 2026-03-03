@@ -28,16 +28,16 @@ export async function DELETE(request: NextRequest) {
       }
 
       // Get all listing IDs to delete their flags first
-      const allListings = db.select({ id: listings.id }).from(listings).all();
+      const allListings = await db.select({ id: listings.id }).from(listings);
       const allIds = allListings.map((l) => l.id);
 
       // Delete all flags first
       if (allIds.length > 0) {
-        db.delete(flags).where(inArray(flags.listingId, allIds)).run();
+        await db.delete(flags).where(inArray(flags.listingId, allIds));
       }
 
       // Delete all listings
-      db.delete(listings).run();
+      await db.delete(listings);
 
       return NextResponse.json({ 
         success: true, 
@@ -53,11 +53,10 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Fetch listings to check permissions
-    const listingsToDelete = db
+    const listingsToDelete = await db
       .select()
       .from(listings)
-      .where(inArray(listings.id, ids))
-      .all();
+      .where(inArray(listings.id, ids));
 
     // Check permissions - superadmins can delete any, municipality admins only their region
     const allowedIds: string[] = [];
@@ -80,11 +79,11 @@ export async function DELETE(request: NextRequest) {
 
     // Delete associated flags first (FK constraint)
     if (allowedIds.length > 0) {
-      db.delete(flags).where(inArray(flags.listingId, allowedIds)).run();
+      await db.delete(flags).where(inArray(flags.listingId, allowedIds));
     }
 
     // Delete the listings
-    db.delete(listings).where(inArray(listings.id, allowedIds)).run();
+    await db.delete(listings).where(inArray(listings.id, allowedIds));
 
     return NextResponse.json({
       success: true,

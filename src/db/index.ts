@@ -1,10 +1,11 @@
-import { drizzle } from "drizzle-orm/better-sqlite3";
-import Database from "better-sqlite3";
+import { drizzle } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
 import * as schema from "./schema";
 
-const sqlite = new Database("./sqlite.db");
+const connectionString = process.env.DATABASE_URL || "postgres://safehaven:safehaven@localhost:5432/safehaven";
 
-// Enable WAL mode for better concurrent read performance
-sqlite.pragma("journal_mode = WAL");
+const pool = new Pool({
+  connectionString,
+});
 
-export const db = drizzle(sqlite, { schema });
+export const db = drizzle(pool, { schema });

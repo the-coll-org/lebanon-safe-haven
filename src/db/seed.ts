@@ -1,12 +1,14 @@
-import Database from "better-sqlite3";
-import { drizzle } from "drizzle-orm/better-sqlite3";
+import { drizzle } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
 import { municipalities } from "./schema";
 import bcrypt from "bcryptjs";
 import { v4 as uuid } from "uuid";
 import crypto from "crypto";
 
-const sqlite = new Database("./sqlite.db");
-const db = drizzle(sqlite);
+const connectionString = process.env.DATABASE_URL || "postgres://safehaven:safehaven@localhost:5432/safehaven";
+
+const pool = new Pool({ connectionString });
+const db = drizzle(pool);
 
 function generatePassword(): string {
   return crypto.randomBytes(12).toString("base64url");
@@ -18,17 +20,15 @@ async function seed() {
   // Super-admin (platform-wide, not tied to a specific region)
   const superAdminPassword = generatePassword();
   const superAdminHash = await bcrypt.hash(superAdminPassword, 10);
-  db.insert(municipalities)
-    .values({
-      id: uuid(),
-      name: "Platform Admin",
-      region: "beirut", // placeholder
-      role: "superadmin",
-      username: "admin",
-      passwordHash: superAdminHash,
-      createdAt: new Date().toISOString(),
-    })
-    .run();
+  await db.insert(municipalities).values({
+    id: uuid(),
+    name: "Platform Admin",
+    region: "beirut", // placeholder
+    role: "superadmin",
+    username: "admin",
+    passwordHash: superAdminHash,
+    createdAt: new Date(),
+  });
   console.log(`  Super admin created:`);
   console.log(`    Username: admin`);
   console.log(`    Password: ${superAdminPassword}`);
@@ -50,22 +50,20 @@ async function seed() {
   for (const m of demoMunicipalities) {
     const password = generatePassword();
     const passwordHash = await bcrypt.hash(password, 10);
-    db.insert(municipalities)
-      .values({
-        id: uuid(),
-        name: m.name,
-        region: m.region,
-        username: m.username,
-        passwordHash,
-        createdAt: new Date().toISOString(),
-      })
-      .run();
+    await db.insert(municipalities).values({
+      id: uuid(),
+      name: m.name,
+      region: m.region,
+      username: m.username,
+      passwordHash,
+      createdAt: new Date(),
+    });
     console.log(`    ${m.username} / ${password}`);
   }
 
   console.log("\n  ⚠  SAVE THESE PASSWORDS — they cannot be recovered!\n");
   console.log("Seed complete!");
-  sqlite.close();
+  await pool.end();
 }
 
 seed().catch(console.error);

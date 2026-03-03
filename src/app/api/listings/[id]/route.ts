@@ -10,7 +10,8 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const listing = db.select().from(listings).where(eq(listings.id, id)).get();
+  const result = await db.select().from(listings).where(eq(listings.id, id)).limit(1);
+  const listing = result[0];
 
   if (!listing) {
     return NextResponse.json({ error: "Listing not found" }, { status: 404 });
@@ -39,7 +40,8 @@ export async function PATCH(
     );
   }
 
-  const listing = db.select().from(listings).where(eq(listings.id, id)).get();
+  const result = await db.select().from(listings).where(eq(listings.id, id)).limit(1);
+  const listing = result[0];
 
   if (!listing) {
     return NextResponse.json({ error: "Listing not found" }, { status: 404 });
@@ -51,7 +53,7 @@ export async function PATCH(
 
   const validStatuses = ["available", "limited", "full"];
   const updates: Record<string, unknown> = {
-    updatedAt: new Date().toISOString(),
+    updatedAt: new Date(),
   };
   if (status && validStatuses.includes(status)) updates.status = status;
   if (description !== undefined)
@@ -81,7 +83,7 @@ export async function PATCH(
     }
   }
 
-  db.update(listings).set(updates).where(eq(listings.id, id)).run();
+  await db.update(listings).set(updates).where(eq(listings.id, id));
 
   return NextResponse.json({ success: true });
 }
@@ -101,7 +103,8 @@ export async function DELETE(
     );
   }
 
-  const listing = db.select().from(listings).where(eq(listings.id, id)).get();
+  const result = await db.select().from(listings).where(eq(listings.id, id)).limit(1);
+  const listing = result[0];
 
   if (!listing) {
     return NextResponse.json({ error: "Listing not found" }, { status: 404 });
@@ -111,7 +114,7 @@ export async function DELETE(
     return NextResponse.json({ error: "Invalid edit token" }, { status: 403 });
   }
 
-  db.delete(listings).where(eq(listings.id, id)).run();
+  await db.delete(listings).where(eq(listings.id, id));
 
   return NextResponse.json({ success: true });
 }

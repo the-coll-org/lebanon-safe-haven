@@ -4,13 +4,15 @@ services:
     restart: unless-stopped
     ports:
       - "127.0.0.1:3000:3000"
-    volumes:
-      - db-data:/data
     environment:
       - NODE_ENV=production
       - SESSION_SECRET=${SESSION_SECRET}
       - ENCRYPTION_KEY=${ENCRYPTION_KEY}
       - HOSTNAME=0.0.0.0
+      - DATABASE_URL=postgres://${DB_USER:-safehaven}:${DB_PASSWORD:-safehaven}@db:5432/${DB_NAME:-safehaven}
+    depends_on:
+      db:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000"]
       interval: 30s
@@ -18,5 +20,20 @@ services:
       retries: 3
       start_period: 90s
 
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=${DB_USER:-safehaven}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-safehaven}
+      - POSTGRES_DB=${DB_NAME:-safehaven}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-safehaven} -d ${DB_NAME:-safehaven}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
 volumes:
-  db-data:
+  postgres-data:

@@ -135,7 +135,7 @@ export async function POST(request: NextRequest) {
 
   const id = uuid();
   const editToken = uuid();
-  const now = new Date().toISOString();
+  const now = new Date();
 
   const listing = {
     id,
@@ -156,7 +156,7 @@ export async function POST(request: NextRequest) {
     updatedAt: now,
   };
 
-  db.insert(listings).values(listing).run();
+  await db.insert(listings).values(listing);
 
   return NextResponse.json({ id, editToken }, { status: 201 });
 }
@@ -314,7 +314,7 @@ export async function PATCH(request: NextRequest) {
 
         const id = uuid();
         const editToken = uuid();
-        const now = new Date().toISOString();
+        const now = new Date();
 
         const listing = {
           id,
@@ -335,7 +335,7 @@ export async function PATCH(request: NextRequest) {
           updatedAt: now,
         };
 
-        db.insert(listings).values(listing).run();
+        await db.insert(listings).values(listing);
         results.success++;
       } catch (err) {
         results.failed++;

@@ -23,7 +23,8 @@ export async function PATCH(
 
   const { id } = await params;
 
-  const listing = db.select().from(listings).where(eq(listings.id, id)).get();
+  const result = await db.select().from(listings).where(eq(listings.id, id)).limit(1);
+  const listing = result[0];
   if (!listing) {
     return NextResponse.json({ error: "Listing not found" }, { status: 404 });
   }
@@ -48,13 +49,12 @@ export async function PATCH(
     }
 
     // Delete all flags for this listing
-    db.delete(flags).where(eq(flags.listingId, id)).run();
+    await db.delete(flags).where(eq(flags.listingId, id));
 
     // Reset flagCount to 0
-    db.update(listings)
-      .set({ flagCount: 0, updatedAt: new Date().toISOString() })
-      .where(eq(listings.id, id))
-      .run();
+    await db.update(listings)
+      .set({ flagCount: 0, updatedAt: new Date() })
+      .where(eq(listings.id, id));
 
     return NextResponse.json({ success: true });
   }
@@ -110,9 +110,9 @@ export async function PATCH(
     return NextResponse.json({ error: "No fields to update" }, { status: 400 });
   }
 
-  updates.updatedAt = new Date().toISOString();
+  updates.updatedAt = new Date();
 
-  db.update(listings).set(updates).where(eq(listings.id, id)).run();
+  await db.update(listings).set(updates).where(eq(listings.id, id));
 
   return NextResponse.json({ success: true });
 }
@@ -131,7 +131,8 @@ export async function DELETE(
 
   const { id } = await params;
 
-  const listing = db.select().from(listings).where(eq(listings.id, id)).get();
+  const result = await db.select().from(listings).where(eq(listings.id, id)).limit(1);
+  const listing = result[0];
   if (!listing) {
     return NextResponse.json({ error: "Listing not found" }, { status: 404 });
   }
@@ -145,8 +146,8 @@ export async function DELETE(
   }
 
   // Delete associated flags first (FK constraint)
-  db.delete(flags).where(eq(flags.listingId, id)).run();
-  db.delete(listings).where(eq(listings.id, id)).run();
+  await db.delete(flags).where(eq(flags.listingId, id));
+  await db.delete(listings).where(eq(listings.id, id));
 
   return NextResponse.json({ success: true });
 }

@@ -9,7 +9,7 @@ Full-stack Next.js 16 humanitarian crisis relief app connecting displaced people
 - **Framework**: Next.js 16 (App Router), React 19
 - **Language**: TypeScript (strict mode)
 - **Styling**: Tailwind CSS v4 + shadcn/ui (new-york style, RTL-enabled)
-- **Database**: SQLite via better-sqlite3 + Drizzle ORM
+- **Database**: PostgreSQL + Drizzle ORM
 - **i18n**: next-intl (locales: `ar`, `en`)
 - **Auth**: Session cookies (HMAC-SHA256 signed), bcrypt password hashing
 - **Encryption**: AES-256-GCM for phone numbers
@@ -21,7 +21,7 @@ npm run dev          # Start dev server (localhost:3000)
 npm run build        # Production build
 npm run start        # Start production server
 npm run lint         # Run ESLint
-npm run db:push      # Push schema changes to SQLite (drizzle-kit push)
+npm run db:push      # Push schema changes to PostgreSQL (drizzle-kit push)
 npm run db:seed      # Seed admin accounts (npx tsx src/db/seed.ts)
 npm run db:studio    # Open Drizzle Studio GUI
 ```
@@ -100,7 +100,7 @@ messages/
 ## Docker Deployment
 
 - `docker-compose.yml` binds to `127.0.0.1:3000` (expects Nginx reverse proxy)
-- SQLite data persisted via Docker volume at `/data/sqlite.db`
+- PostgreSQL data persisted via Docker volume at `/var/lib/postgresql/data`
 - `docker-entrypoint.sh` handles DB migration and first-run seeding
 
 ## Conventions

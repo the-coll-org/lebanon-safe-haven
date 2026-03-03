@@ -14,14 +14,14 @@ import type { Region, ListingCategory } from "@/types";
 const PHONE_REGEX = /^\+?[\d\s\-/]{7,20}$/;
 
 // Auto-expire listings older than 30 days
-function cleanupExpired() {
-  const cutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-  db.delete(listings).where(lt(listings.createdAt, cutoff)).run();
+async function cleanupExpired() {
+  const cutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+  await db.delete(listings).where(lt(listings.createdAt, cutoff));
 }
 
 export async function GET(request: NextRequest) {
   // Periodically clean up old listings
-  cleanupExpired();
+  await cleanupExpired();
 
   const { searchParams } = request.nextUrl;
   const region = searchParams.get("region") as Region | null;
@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
     query = query.where(and(conditions[0], conditions[1])) as typeof query;
   }
 
-  const results = await query.all();
+  const results = await query;
 
   // Admin sees full data (decrypted phone); public gets no phone
   const session = await getSession();
@@ -133,7 +133,7 @@ export async function POST(request: NextRequest) {
 
   const id = uuid();
   const editToken = uuid();
-  const now = new Date().toISOString();
+  const now = new Date();
 
   const listing = {
     id,
@@ -154,7 +154,7 @@ export async function POST(request: NextRequest) {
     updatedAt: now,
   };
 
-  db.insert(listings).values(listing).run();
+  await db.insert(listings).values(listing);
 
   return NextResponse.json({ id, editToken }, { status: 201 });
 }

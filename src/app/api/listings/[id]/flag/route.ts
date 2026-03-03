@@ -24,25 +24,24 @@ export async function POST(
   const { id } = await params;
   const body = await request.json();
 
-  const listing = db.select().from(listings).where(eq(listings.id, id)).get();
+  const result = await db.select().from(listings).where(eq(listings.id, id)).limit(1);
+  const listing = result[0];
 
   if (!listing) {
     return NextResponse.json({ error: "Listing not found" }, { status: 404 });
   }
 
-  db.insert(flags)
+  await db.insert(flags)
     .values({
       id: uuid(),
       listingId: id,
       reason: body.reason?.slice(0, 500)?.trim() || null,
-      createdAt: new Date().toISOString(),
-    })
-    .run();
+      createdAt: new Date(),
+    });
 
-  db.update(listings)
+  await db.update(listings)
     .set({ flagCount: sql`${listings.flagCount} + 1` })
-    .where(eq(listings.id, id))
-    .run();
+    .where(eq(listings.id, id));
 
   return NextResponse.json({ success: true }, { status: 201 });
 }

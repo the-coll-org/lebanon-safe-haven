@@ -1,0 +1,34 @@
+import { NextResponse } from 'next/server';
+import { db } from '@/db';
+import { sql } from 'drizzle-orm';
+
+export const dynamic = 'force-dynamic';
+
+export async function GET() {
+  try {
+    // Check database connectivity using PostgreSQL
+    const result = await db.execute(sql`SELECT 1 as check`);
+    
+    if (!result || result.rows.length === 0) {
+      throw new Error('Database health check failed');
+    }
+
+    return NextResponse.json({
+      status: 'healthy',
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      version: process.env.npm_package_version || '0.1.0',
+      checks: {
+        database: 'ok'
+      }
+    }, { status: 200 });
+  } catch (error) {
+    console.error('Health check failed:', error);
+    
+    return NextResponse.json({
+      status: 'unhealthy',
+      timestamp: new Date().toISOString(),
+      error: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 503 });
+  }
+}

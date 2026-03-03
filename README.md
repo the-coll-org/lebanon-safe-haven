@@ -11,7 +11,8 @@ git clone https://github.com/the-coll-org/lebanon-safe-haven.git
 cd lebanon-safe-haven
 npm install
 cp .example.env .env.local        # then fill in real values (see below)
-npx drizzle-kit push              # create SQLite tables
+docker compose up -d db           # start PostgreSQL
+npx drizzle-kit push              # create PostgreSQL tables
 npm run db:seed                   # create admin accounts — save the printed passwords!
 npm run dev                       # http://localhost:3000
 ```
@@ -40,7 +41,7 @@ For local dev, any placeholder values work. In production, generate real keys an
 | Framework | Next.js 16 (App Router) |
 | UI | shadcn/ui + Tailwind v4, RTL-native |
 | i18n | next-intl (Arabic default, English) |
-| DB | SQLite via Drizzle ORM + better-sqlite3 |
+| DB | PostgreSQL via Drizzle ORM + node-postgres |
 | Auth | bcrypt + HMAC-signed session cookies |
 
 ## Project Structure
@@ -75,14 +76,14 @@ npm run dev          # Hot-reload dev server (localhost:3000)
 npm run build        # Production build
 npm run start        # Start built app
 npm run lint         # ESLint
-npm run db:push      # Push schema to SQLite (idempotent, safe to re-run)
+npm run db:push      # Push schema to PostgreSQL (idempotent, safe to re-run)
 npm run db:seed      # Seed admin accounts (prints credentials once)
 npm run db:studio    # Drizzle Studio GUI at http://local.drizzle.studio
 ```
 
 ## Database
 
-Three tables in `sqlite.db`, managed by Drizzle ORM:
+Three tables in PostgreSQL, managed by Drizzle ORM:
 
 - **listings** — id, phone (AES-256-GCM encrypted), region, category, area, capacity, description, status, edit_token, verified, verified_by, flag_count, latitude, longitude, timestamps
 - **municipalities** — id, name, region, role, username, password_hash, created_at
@@ -174,10 +175,14 @@ docker compose up -d --build
 docker compose logs app           # retrieve first-run admin credentials
 ```
 
-The SQLite database lives in a Docker named volume (`db-data`). Back it up with:
+The PostgreSQL database lives in a Docker named volume (`postgres-data`). Back it up with:
 
 ```bash
-docker run --rm -v lebanon-safe-haven_db-data:/data -v $(pwd):/backup alpine cp /data/sqlite.db /backup/sqlite-backup.db
+# Create backup
+docker compose exec db pg_dump -U safehaven safehaven > backup.sql
+
+# Restore from backup
+docker compose exec -T db psql -U safehaven safehaven < backup.sql
 ```
 
 ## Locale Note

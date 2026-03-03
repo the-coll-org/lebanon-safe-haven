@@ -1,7 +1,7 @@
 FROM node:20-alpine
 
-# Native module build tools (required for better-sqlite3)
-RUN apk add --no-cache libc6-compat python3 make g++
+# Install PostgreSQL client tools for pg_isready
+RUN apk add --no-cache postgresql-client
 
 WORKDIR /app
 
@@ -13,9 +13,6 @@ RUN npm install
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
-
-# Persistent data directory for SQLite
-RUN mkdir -p /data
 
 EXPOSE 3000
 ENV NODE_ENV=production

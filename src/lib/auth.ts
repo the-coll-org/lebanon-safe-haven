@@ -46,11 +46,13 @@ export async function authenticateAdmin(
   username: string,
   password: string
 ) {
-  const municipality = await db
+  const result = await db
     .select()
     .from(municipalities)
     .where(eq(municipalities.username, username))
-    .get();
+    .limit(1);
+  
+  const municipality = result[0];
 
   if (!municipality) {
     // Constant-time: still hash to prevent timing-based user enumeration
@@ -96,11 +98,13 @@ export async function getSession() {
     // Check session expiry
     if (Date.now() - data.ts > SESSION_MAX_AGE * 1000) return null;
 
-    const municipality = await db
+    const result = await db
       .select()
       .from(municipalities)
       .where(eq(municipalities.id, data.id))
-      .get();
+      .limit(1);
+    
+    const municipality = result[0];
 
     return municipality || null;
   } catch {

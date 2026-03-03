@@ -20,7 +20,8 @@ export async function PATCH(
 
   const { id } = await params;
 
-  const listing = db.select().from(listings).where(eq(listings.id, id)).get();
+  const result = await db.select().from(listings).where(eq(listings.id, id)).limit(1);
+  const listing = result[0];
 
   if (!listing) {
     return NextResponse.json({ error: "Listing not found" }, { status: 404 });
@@ -42,14 +43,13 @@ export async function PATCH(
     );
   }
 
-  db.update(listings)
+  await db.update(listings)
     .set({
       verified: true,
       verifiedBy: session.id,
-      updatedAt: new Date().toISOString(),
+      updatedAt: new Date(),
     })
-    .where(eq(listings.id, id))
-    .run();
+    .where(eq(listings.id, id));
 
   return NextResponse.json({ success: true });
 }

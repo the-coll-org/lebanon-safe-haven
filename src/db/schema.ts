@@ -1,6 +1,6 @@
-import { sqliteTable, text, integer, real } from "drizzle-orm/sqlite-core";
+import { pgTable, text, integer, real, boolean, timestamp } from "drizzle-orm/pg-core";
 
-export const listings = sqliteTable("listings", {
+export const listings = pgTable("listings", {
   id: text("id").primaryKey(),
   phone: text("phone").notNull(),
   region: text("region").notNull(),
@@ -10,41 +10,41 @@ export const listings = sqliteTable("listings", {
   description: text("description"),
   status: text("status").notNull().default("available"),
   editToken: text("edit_token").notNull(),
-  verified: integer("verified", { mode: "boolean" }).notNull().default(false),
+  verified: boolean("verified").notNull().default(false),
   verifiedBy: text("verified_by"),
   flagCount: integer("flag_count").notNull().default(0),
   latitude: real("latitude"),
   longitude: real("longitude"),
-  createdAt: text("created_at").notNull(),
-  updatedAt: text("updated_at").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull(),
 });
 
-export const municipalities = sqliteTable("municipalities", {
+export const municipalities = pgTable("municipalities", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
   region: text("region").notNull(),
   role: text("role").notNull().default("municipality"),
   username: text("username").notNull().unique(),
   passwordHash: text("password_hash").notNull(),
-  createdAt: text("created_at").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull(),
 });
 
-export const flags = sqliteTable("flags", {
+export const flags = pgTable("flags", {
   id: text("id").primaryKey(),
   listingId: text("listing_id")
     .notNull()
-    .references(() => listings.id),
+    .references(() => listings.id, { onDelete: "cascade" }),
   reason: text("reason"),
-  createdAt: text("created_at").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull(),
 });
 
-export const feedback = sqliteTable("feedback", {
+export const feedback = pgTable("feedback", {
   id: text("id").primaryKey(),
   name: text("name"),
   email: text("email"),
   message: text("message").notNull(),
   category: text("category").notNull().default("general"),
   userType: text("user_type").notNull().default("guest"),
-  municipalityId: text("municipality_id").references(() => municipalities.id),
-  createdAt: text("created_at").notNull(),
+  municipalityId: text("municipality_id").references(() => municipalities.id, { onDelete: "set null" }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull(),
 });

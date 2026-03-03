@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
   const userType = session ? "authenticated" : "guest";
 
   const id = uuid();
-  const now = new Date().toISOString();
+  const now = new Date();
 
   db.insert(feedback).values({
     id,
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
     userType,
     municipalityId,
     createdAt: now,
-  }).run();
+  });
 
   return NextResponse.json({ 
     success: true, 

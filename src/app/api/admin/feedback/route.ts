@@ -35,15 +35,14 @@ export async function GET(request: NextRequest) {
     .orderBy(desc(feedback.createdAt))
     .limit(limit)
     .offset(offset)
-    .all();
+    ;
 
   // Get total count
   const countResult = await db
     .select({ count: sql<number>`count(*)` })
-    .from(feedback)
-    .get();
+    .from(feedback);
 
-  const total = countResult?.count ?? 0;
+  const total = countResult[0]?.count ?? 0;
 
   return NextResponse.json({
     feedback: results,
