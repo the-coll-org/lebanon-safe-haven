@@ -36,6 +36,29 @@ export async function PATCH(
   }
 
   const body = await request.json();
+
+  // Handle unflag action
+  if (body.action === "unflag") {
+    // Check permissions
+    if (session.role !== "superadmin" && session.region !== listing.region) {
+      return NextResponse.json(
+        { error: "You can only unflag listings in your region" },
+        { status: 403 }
+      );
+    }
+
+    // Delete all flags for this listing
+    db.delete(flags).where(eq(flags.listingId, id)).run();
+
+    // Reset flagCount to 0
+    db.update(listings)
+      .set({ flagCount: 0, updatedAt: new Date().toISOString() })
+      .where(eq(listings.id, id))
+      .run();
+
+    return NextResponse.json({ success: true });
+  }
+
   const updates: Record<string, unknown> = {};
 
   if (body.phone !== undefined) {
