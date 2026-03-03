@@ -24,7 +24,8 @@
     "map": "Map",
     "hotlines": "Hotlines",
     "resources": "Resources",
-    "admin": "Municipality"
+    "admin": "Municipality",
+    "feedback": "Feedback"
   },
   "home": {
     "heroTitle": "Need Help?",
@@ -160,7 +161,14 @@
     "deleteAllWarning": "This will permanently delete {count} listings. This action cannot be undone.",
     "confirmDelete": "Confirm Delete",
     "cancel": "Cancel",
-    "unflag": "Unflag"
+    "unflag": "Unflag",
+    "viewFeedback": "View Feedback",
+    "feedbackTitle": "Feedback Received",
+    "noFeedback": "No feedback yet",
+    "adminUser": "Admin",
+    "prev": "Previous",
+    "next": "Next",
+    "pagination": "{start} - {end} of {total}"
   },
   "flag": {
     "title": "Report this listing",
@@ -190,5 +198,29 @@
     "baalbek_hermel": "Baalbek-Hermel",
     "akkar": "Akkar",
     "north_lebanon": "North Lebanon"
+  },
+  "feedback": {
+    "title": "Provide Feedback",
+    "subtitle": "Help us improve the platform - we value your feedback",
+    "category": "Feedback Type",
+    "selectCategory": "Select feedback type",
+    "categories": {
+      "general": "General",
+      "bug": "Bug Report",
+      "feature": "Feature Request",
+      "complaint": "Complaint",
+      "other": "Other"
+    },
+    "name": "Name (optional)",
+    "namePlaceholder": "Your name",
+    "email": "Email (optional)",
+    "emailPlaceholder": "your@email.com",
+    "message": "Message",
+    "messagePlaceholder": "Write your feedback here...",
+    "messageHint": "Message must be between {min} and {max} characters",
+    "submit": "Submit Feedback",
+    "submitting": "Submitting...",
+    "success": "Feedback submitted successfully, thank you!",
+    "error": "An error occurred while submitting feedback"
   }
 }

@@ -12,6 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { AdminEditDialog } from "@/components/admin-edit-dialog";
 import { AdminCreateDialog } from "@/components/admin-create-dialog";
 import { ImportExportDialog } from "@/components/import-export-dialog";
+import { FeedbackDialog } from "@/components/feedback-dialog";
 import {
   BadgeCheck,
   LogOut,
@@ -360,6 +361,7 @@ export default function AdminDashboardPage() {
           defaultRegion={isSuperadmin ? null : adminRegion}
         />
         <ImportExportDialog onImportSuccess={refreshListings} />
+        <FeedbackDialog />
       </div>
 
       {/* Bulk Actions */}

@@ -27,6 +27,7 @@ export function Header() {
     { href: "/offer" as const, label: t("offer") },
     { href: "/hotlines" as const, label: t("hotlines") },
     { href: "/resources" as const, label: t("resources") },
+    { href: "/feedback" as const, label: t("feedback") },
   ];
 
   return (
