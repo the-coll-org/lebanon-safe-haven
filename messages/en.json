@@ -2,7 +2,7 @@
   "common": {
     "appName": "Safe Haven",
     "tagline": "Connecting displaced people with available relief",
-    "disclaimer": "Safe Haven facilitates connections only. We do not vet individuals, guarantee safety, or assume liability. Always exercise caution.",
+    "disclaimer": "IMPORTANT SECURITY NOTICE: This platform was quickly developed to connect people who need help with those who offer help. The platform has not been tested and hardened for security and data privacy. Do NOT share any information you are not comfortable sharing publicly. Any information you provide will be publicly available. Proceed with caution.",
     "loading": "Loading...",
     "error": "An error occurred",
     "back": "Back",
