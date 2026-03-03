@@ -13,7 +13,7 @@ Crisis relief app connecting displaced people in Lebanon with shelter, food, and
 3. [Deploy on a Production-Ready Server (Docker + Nginx)](#3-deploy-on-a-production-ready-server-docker--nginx)
 4. [Environment Variable Reference](#environment-variable-reference)
 5. [Project Reference](#project-reference)
-
+6. [Changelog](#Changelog)
 ---
 
 ## Prerequisites
@@ -487,3 +487,7 @@ Three tables in `sqlite.db`:
 ### PII
 
 Only stored PII is **phone numbers**, AES-256-GCM encrypted in the listings table. No user accounts, emails, names, or tracking. Listing creators receive a UUID edit token instead of an account.
+
+## Changelog
+### v0.1.0
+- Initial development effort of the platform
