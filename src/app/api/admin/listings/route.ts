@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { listings } from "@/db/schema";
-import { eq } from "drizzle-orm";
+
 import { getSession } from "@/lib/auth";
 import { validateOrigin } from "@/lib/csrf";
-import { encryptPhone, decryptPhone } from "@/lib/crypto";
+import { encryptPhone } from "@/lib/crypto";
 import { REGION_LIST, LISTING_CATEGORIES, REGIONS } from "@/lib/constants";
 import { v4 as uuid } from "uuid";
-import * as XLSX from "xlsx";
+
 import type { Region } from "@/types";
 
 const PHONE_REGEX = /^\+?[\d\s\-/]{7,20}$/;
@@ -161,63 +161,60 @@ export async function POST(request: NextRequest) {
   return NextResponse.json({ id, editToken }, { status: 201 });
 }
 
-// Export listings to Excel
-export async function GET(request: NextRequest) {
-  const session = await getSession();
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+// Parse CSV line handling quoted fields
+function parseCSVLine(line: string): string[] {
+  const result: string[] = [];
+  let current = "";
+  let inQuotes = false;
+  
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i];
+    const nextChar = line[i + 1];
+    
+    if (char === '"') {
+      if (inQuotes && nextChar === '"') {
+        // Escaped quote
+        current += '"';
+        i++;
+      } else {
+        // Toggle quote state
+        inQuotes = !inQuotes;
+      }
+    } else if (char === ',' && !inQuotes) {
+      result.push(current.trim());
+      current = "";
+    } else {
+      current += char;
+    }
   }
-
-  const { searchParams } = request.nextUrl;
-  const format = searchParams.get("format");
-
-  if (format !== "xlsx") {
-    return NextResponse.json({ error: "Invalid format" }, { status: 400 });
-  }
-
-  // Get listings based on permissions
-  let query = db.select().from(listings);
-  if (session.role !== "superadmin" && session.region) {
-    query = query.where(eq(listings.region, session.region)) as typeof query;
-  }
-
-  const allListings = query.all();
-
-  // Prepare data for export
-  const exportData = allListings.map((listing) => ({
-    ID: listing.id,
-    Phone: decryptPhone(listing.phone),
-    Region: listing.region,
-    Area: listing.area || "",
-    Category: listing.category,
-    Capacity: listing.capacity,
-    Description: listing.description || "",
-    Status: listing.status,
-    Verified: listing.verified ? "Yes" : "No",
-    "Flag Count": listing.flagCount,
-    "Created At": listing.createdAt,
-    "Updated At": listing.updatedAt,
-    Latitude: listing.latitude || "",
-    Longitude: listing.longitude || "",
-  }));
-
-  // Create workbook
-  const wb = XLSX.utils.book_new();
-  const ws = XLSX.utils.json_to_sheet(exportData);
-  XLSX.utils.book_append_sheet(wb, ws, "Listings");
-
-  // Generate buffer
-  const buf = XLSX.write(wb, { type: "buffer", bookType: "xlsx" });
-
-  return new NextResponse(buf, {
-    headers: {
-      "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      "Content-Disposition": `attachment; filename="listings_${new Date().toISOString().split("T")[0]}.xlsx"`,
-    },
-  });
+  
+  result.push(current.trim());
+  return result;
 }
 
-// Import listings from Excel
+// Parse CSV content to array of objects
+function parseCSV(csvContent: string): Array<Record<string, string>> {
+  const lines = csvContent.split(/\r?\n/).filter(line => line.trim());
+  if (lines.length < 2) return [];
+  
+  const headers = parseCSVLine(lines[0]).map(h => h.toLowerCase().trim());
+  const result: Array<Record<string, string>> = [];
+  
+  for (let i = 1; i < lines.length; i++) {
+    const values = parseCSVLine(lines[i]);
+    const row: Record<string, string> = {};
+    
+    headers.forEach((header, index) => {
+      row[header] = values[index] || "";
+    });
+    
+    result.push(row);
+  }
+  
+  return result;
+}
+
+// Import listings from CSV
 export async function PATCH(request: NextRequest) {
   const csrf = validateOrigin(request);
   if (csrf) return csrf;
@@ -235,10 +232,9 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 
-    const arrayBuffer = await file.arrayBuffer();
-    const workbook = XLSX.read(arrayBuffer, { type: "array" });
-    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-    const jsonData = XLSX.utils.sheet_to_json(worksheet) as Array<Record<string, unknown>>;
+    // Read file as text
+    const csvContent = await file.text();
+    const jsonData = parseCSV(csvContent);
 
     const results = {
       success: 0,
@@ -248,15 +244,15 @@ export async function PATCH(request: NextRequest) {
 
     for (const row of jsonData) {
       try {
-        const phone = String(row.Phone || row.phone || "").trim();
-        const regionInput = String(row.Region || row.region || "").trim();
+        const phone = String(row.phone || "").trim();
+        const regionInput = String(row.region || "").trim();
         const region = normalizeRegion(regionInput);
-        const category = String(row.Category || row.category || "shelter").trim();
-        const capacity = Number(row.Capacity || row.capacity || 0);
-        const area = String(row.Area || row.area || "").trim() || null;
-        const description = String(row.Description || row.description || "").trim() || null;
-        const latitude = row.Latitude || row.latitude ? Number(row.Latitude || row.latitude) : null;
-        const longitude = row.Longitude || row.longitude ? Number(row.Longitude || row.longitude) : null;
+        const category = String(row.category || "shelter").trim();
+        const capacity = Number(row.capacity || 0);
+        const area = String(row.area || "").trim() || null;
+        const description = String(row.description || "").trim() || null;
+        const latitude = row.latitude ? Number(row.latitude) : null;
+        const longitude = row.longitude ? Number(row.longitude) : null;
 
         // Validation
         if (!phone || !regionInput || !capacity) {

@@ -10,7 +10,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { FileUp, Download, FileSpreadsheet } from "lucide-react";
+import { FileUp, Upload, Download } from "lucide-react";
 
 interface ImportExportDialogProps {
   onImportSuccess: () => void;
@@ -27,28 +27,6 @@ export function ImportExportDialog({ onImportSuccess }: ImportExportDialogProps)
     errors: string[];
   } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  async function handleExport() {
-    try {
-      const res = await fetch("/api/admin/listings?format=xlsx");
-      if (!res.ok) {
-        throw new Error("Export failed");
-      }
-
-      const blob = await res.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `listings_${new Date().toISOString().split("T")[0]}.xlsx`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-    } catch (err) {
-      console.error("Export error:", err);
-      alert(t("exportError"));
-    }
-  }
 
   async function handleFileSelect(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -105,49 +83,36 @@ export function ImportExportDialog({ onImportSuccess }: ImportExportDialogProps)
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" className="gap-1">
-          <FileSpreadsheet className="h-4 w-4" />
-          {t("importExport")}
+          <Upload className="h-4 w-4" />
+          {t("importListings")}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>{t("importExportTitle")}</DialogTitle>
+          <DialogTitle>{t("importListings")}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6 py-4">
-          {/* Export Section */}
-          <div className="space-y-2">
-            <h3 className="text-sm font-medium">{t("exportListings")}</h3>
-            <p className="text-xs text-muted-foreground">
-              {t("exportDescription")}
-            </p>
-            <Button 
-              onClick={handleExport} 
-              className="w-full gap-2"
-              variant="secondary"
-            >
-              <Download className="h-4 w-4" />
-              {t("downloadExcel")}
-            </Button>
-          </div>
-
-          <hr className="border-border" />
-
           {/* Import Section */}
           <div className="space-y-2">
-            <h3 className="text-sm font-medium">{t("importListings")}</h3>
             <p className="text-xs text-muted-foreground">
               {t("importDescription")}
             </p>
+            <a href="/listings_template.csv" download>
+              <Button variant="secondary" className="w-full gap-2">
+                <Download className="h-4 w-4" />
+                {t("downloadTemplate")}
+              </Button>
+            </a>
             <input
               type="file"
-              accept=".xlsx,.xls"
+              accept=".csv"
               onChange={handleFileSelect}
               ref={fileInputRef}
               className="hidden"
-              id="excel-import"
+              id="csv-import"
             />
-            <label htmlFor="excel-import">
+            <label htmlFor="csv-import">
               <Button 
                 asChild
                 className="w-full gap-2"
@@ -155,7 +120,7 @@ export function ImportExportDialog({ onImportSuccess }: ImportExportDialogProps)
               >
                 <span>
                   <FileUp className="h-4 w-4" />
-                  {importing ? t("importing") : t("uploadExcel")}
+                  {importing ? t("importing") : t("uploadCSV")}
                 </span>
               </Button>
             </label>
@@ -186,10 +151,10 @@ export function ImportExportDialog({ onImportSuccess }: ImportExportDialogProps)
 
           {/* Template Info */}
           <div className="text-xs text-muted-foreground bg-muted p-3 rounded-md">
-            <p className="font-medium mb-1">{t("excelTemplateTitle")}:</p>
-            <p>{t("excelTemplateDescription")}</p>
+            <p className="font-medium mb-1">{t("csvTemplateTitle")}:</p>
+            <p>{t("csvTemplateDescription")}</p>
             <div className="mt-2 font-mono text-[10px]">
-              Phone, Region, Area, Category, Capacity, Description, Latitude, Longitude
+              phone,region,area,category,capacity,description,latitude,longitude
             </div>
             <div className="mt-2 text-[10px]">
               <p className="font-medium">{t("validRegions")}:</p>
