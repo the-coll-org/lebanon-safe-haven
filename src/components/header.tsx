@@ -63,7 +63,7 @@ export function Header() {
               </Button>
             </SheetTrigger>
             <SheetContent side={locale === "ar" ? "right" : "left"}>
-              <SheetTitle className="text-start mb-4">
+              <SheetTitle className="text-start mt-4 mb-4 px-4">
                 {tc("appName")}
               </SheetTitle>
               <nav className="flex flex-col gap-2">

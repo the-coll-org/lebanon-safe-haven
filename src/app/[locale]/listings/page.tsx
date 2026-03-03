@@ -11,6 +11,7 @@ import type { Listing } from "@/types";
 
 export default function ListingsPage() {
   const t = useTranslations("listings");
+  const tr = useTranslations("regions");
   const [listings, setListings] = useState<Listing[]>([]);
   const [region, setRegion] = useState("all");
   const [category, setCategory] = useState("all");
@@ -36,6 +37,7 @@ export default function ListingsPage() {
   const filtered = listings.filter(
     (l) =>
       !search ||
+      tr(l.region).toLowerCase().includes(searchLower) ||
       (l.area && l.area.toLowerCase().includes(searchLower)) ||
       (l.description && l.description.toLowerCase().includes(searchLower))
   );

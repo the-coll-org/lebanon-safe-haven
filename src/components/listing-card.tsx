@@ -97,7 +97,7 @@ export function ListingCard({ listing }: ListingCardProps) {
               {listing.capacity} {listing.capacity === 1 ? unitSingular : unitPlural}
             </span>
             {listing.description && (
-              <span className="truncate">{listing.description}</span>
+              <span className="truncate max-w-[150px] sm:max-w-[250px]">{listing.description}</span>
             )}
           </div>
 

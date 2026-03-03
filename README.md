@@ -4,380 +4,36 @@ Crisis relief app connecting displaced people in Lebanon with shelter, food, and
 
 **Not a provider.** This platform only facilitates connections between people who need help and people who can offer it. All interactions happen directly between users.
 
----
-
-## Table of Contents
-
-1. [Run Locally (development)](#1-run-locally-development)
-2. [Run on a Makeshift Dev Server (Node.js, no Docker)](#2-run-on-a-makeshift-dev-server-nodejs-no-docker)
-3. [Deploy on a Production-Ready Server (Docker + Nginx)](#3-deploy-on-a-production-ready-server-docker--nginx)
-4. [Environment Variable Reference](#environment-variable-reference)
-5. [Project Reference](#project-reference)
-6. [Changelog](#Changelog)
----
-
-## Prerequisites
-
-| Requirement | Minimum version | Notes |
-|-------------|----------------|-------|
-| Node.js     | 20.x            | Required for all three setups |
-| npm         | 10.x            | Bundled with Node.js 20 |
-| Git         | any recent      | |
-| Docker Engine + Compose | 24+ / v2 | Docker-based setups only |
-
----
-
-## 1. Run Locally (development)
-
-Use this when developing features. The dev server provides hot-reload, source maps, and verbose error overlays.
-
-### Step 1 — Clone and install dependencies
+## Quick Start
 
 ```bash
 git clone https://github.com/the-coll-org/lebanon-safe-haven.git
 cd lebanon-safe-haven
 npm install
+cp .example.env .env.local        # then fill in real values (see below)
+npx drizzle-kit push              # create SQLite tables
+npm run db:seed                   # create admin accounts — save the printed passwords!
+npm run dev                       # http://localhost:3000
 ```
 
-### Step 2 — Set environment variables
+## Environment Variables
 
-Create `.env.local` in the project root:
+Copy `.example.env` to `.env.local` (dev) or `.env` (Docker). Two required secrets:
 
-```env
-# .env.local
+| Variable | Purpose |
+|----------|---------|
+| `SESSION_SECRET` | HMAC-SHA256 signing key for session cookies (min 32 chars) |
+| `ENCRYPTION_KEY` | 64 hex chars (32 bytes) for AES-256-GCM phone encryption |
 
-# HMAC key for session cookies — any random string is fine locally
-SESSION_SECRET=local-dev-secret-change-in-production
-
-# 64 hex chars = 32 bytes for AES-256-GCM phone encryption
-# The zeroed key below is safe for local dev only — never use it with real data
-ENCRYPTION_KEY=0000000000000000000000000000000000000000000000000000000000000000
-```
-
-To generate real values when needed:
-
-```bash
-# SESSION_SECRET
-node -e "console.log(require('crypto').randomBytes(48).toString('base64'))"
-
-# ENCRYPTION_KEY
-node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
-```
-
-### Step 3 — Initialise the database
-
-```bash
-npm run db:push   # Creates sqlite.db and applies the schema (idempotent — safe to re-run)
-npm run db:seed   # Creates admin accounts and prints credentials to stdout
-```
-
-> **Important:** `db:seed` prints credentials only once. Save them before the terminal session ends.
-
-### Step 4 — Start the dev server
-
-```bash
-npm run dev
-```
-
-- App: `http://localhost:3000`
-- Default locale redirects to Arabic: `http://localhost:3000/ar`
-- English: `http://localhost:3000/en`
-- Admin panel: `http://localhost:3000/ar/admin`
-
-### Other dev commands
-
-```bash
-npm run lint        # ESLint (TypeScript + Next.js rules)
-npm run db:studio   # Drizzle Studio GUI at http://local.drizzle.studio
-```
-
----
-
-## 2. Run on a Makeshift Dev Server (Node.js, no Docker)
-
-Use this when you need the production build running on a remote machine — a shared VPS, a CI preview environment, or a short-lived staging box — without setting up Docker or a full reverse proxy.
-
-> **Caution:** This mode exposes the app directly on a port. Use it behind a firewall or VPN only, or with an SSH tunnel. It is not hardened for public traffic.
-
-### Step 1 — Provision the server
-
-On the remote machine:
-
-```bash
-# Install Node.js 20 via nvm (recommended)
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
-source ~/.bashrc
-nvm install 20
-nvm use 20
-
-# Verify
-node -v   # should print v20.x.x
-```
-
-### Step 2 — Clone, install, and build
-
-```bash
-git clone https://github.com/the-coll-org/lebanon-safe-haven.git
-cd lebanon-safe-haven
-npm install
-npm run build
-```
-
-### Step 3 — Set environment variables
-
-```bash
-# Create .env.local or export in your shell / process manager config
-cat > .env.local <<'EOF'
-SESSION_SECRET=<min-32-char-random-string>
-ENCRYPTION_KEY=<64-hex-chars>
-NODE_ENV=production
-EOF
-```
-
-Generate values:
-
-```bash
-node -e "console.log(require('crypto').randomBytes(48).toString('base64'))"  # SESSION_SECRET
-node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"     # ENCRYPTION_KEY
-```
-
-### Step 4 — Initialise the database
-
-```bash
-npm run db:push   # Apply schema (idempotent)
-npm run db:seed   # Seed admin accounts — save the printed credentials
-```
-
-### Step 5 — Start the production server
-
-```bash
-npm run start
-# Listens on http://0.0.0.0:3000
-```
-
-To persist across SSH disconnects and reboots, use pm2:
-
-```bash
-npm install -g pm2
-pm2 start "npm run start" --name safe-haven
-pm2 save
-pm2 startup   # follow the printed command to enable auto-start on reboot
-```
-
-Verify it is running:
-
-```bash
-pm2 status
-curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/ar
-# Expected: 200
-```
-
-### Step 6 — (Optional) SSH tunnel for local access
-
-If the server is behind a firewall and you just need to access it from your machine:
-
-```bash
-# On your local machine
-ssh -L 3000:localhost:3000 user@server-ip
-# Then open http://localhost:3000 in your browser
-```
-
-### Updating the server
-
-```bash
-cd lebanon-safe-haven
-git pull origin main
-npm install
-npm run build
-pm2 restart safe-haven
-```
-
----
-
-## 3. Deploy on a Production-Ready Server (Docker + Nginx)
-
-Use this for any publicly accessible or long-lived deployment.
-
-```
-Internet ──▶ Nginx (443/TLS, reverse proxy) ──▶ Docker (Next.js :3000) ──▶ SQLite volume
-```
-
-### Step 1 — Server prerequisites
-
-Recommended OS: Ubuntu 22.04 LTS. Also requires:
-- Docker Engine + Docker Compose v2
-- Nginx
-- A domain name with an A record pointing to the server's IP
-- Certbot (Let's Encrypt) for TLS
-
-Install Docker if not already present:
-
-```bash
-curl -fsSL https://get.docker.com | sh
-sudo usermod -aG docker $USER
-# Log out and back in for the group change to take effect
-docker --version  # verify
-```
-
-### Step 2 — Clone the repository
-
-```bash
-git clone https://github.com/the-coll-org/lebanon-safe-haven.git
-cd lebanon-safe-haven
-```
-
-### Step 3 — Create the environment file
-
-```bash
-touch .env
-```
-
-Edit `.env` (read by Docker Compose via the `${VAR}` references in `docker-compose.yml`):
-
-```env
-SESSION_SECRET=<min-32-char-random-string>
-ENCRYPTION_KEY=<64-hex-chars>
-```
-
-Generate values:
-
-```bash
-node -e "console.log(require('crypto').randomBytes(48).toString('base64'))"  # SESSION_SECRET
-node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"     # ENCRYPTION_KEY
-```
-
-> **Never commit `.env` to version control.**
-
-### Step 4 — Build and start the container
-
-```bash
-docker compose up -d --build
-```
-
-The `docker-entrypoint.sh` runs automatically on every start and does the following:
-
-1. Creates `/data` if it doesn't exist.
-2. Symlinks `/app/sqlite.db` → `/data/sqlite.db` (backed by the `db-data` Docker volume).
-3. Runs `drizzle-kit push` to apply/update the schema (idempotent).
-4. Runs `db:seed` **only on first boot** (when no database file exists yet) — admin credentials are printed to container logs.
-
-Retrieve first-run credentials:
-
-```bash
-docker compose logs app | grep -A 20 "Seeding database"
-```
-
-Verify the container reaches healthy status (~90 seconds after first start):
-
-```bash
-docker compose ps          # STATUS column should show "healthy"
-docker compose logs -f app # tail live logs
-```
-
-### Step 5 — Configure Nginx and TLS
-
-Install Nginx and Certbot:
-
-```bash
-sudo apt update
-sudo apt install -y nginx certbot python3-certbot-nginx
-```
-
-Obtain a TLS certificate (replace `yourdomain.com` throughout):
-
-```bash
-sudo certbot --nginx -d yourdomain.com
-```
-
-Create `/etc/nginx/sites-available/safe-haven`:
-
-```nginx
-server {
-    listen 80;
-    server_name yourdomain.com;
-    return 301 https://$host$request_uri;
-}
-
-server {
-    listen 443 ssl;
-    server_name yourdomain.com;
-
-    ssl_certificate     /etc/letsencrypt/live/yourdomain.com/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/yourdomain.com/privkey.pem;
-    include             /etc/letsencrypt/options-ssl-nginx.conf;
-    ssl_dhparam         /etc/letsencrypt/ssl-dhparams.pem;
-
-    location / {
-        proxy_pass         http://127.0.0.1:3000;
-        proxy_http_version 1.1;
-        proxy_set_header   Upgrade $http_upgrade;
-        proxy_set_header   Connection 'upgrade';
-        proxy_set_header   Host $host;
-        proxy_set_header   X-Real-IP $remote_addr;
-        proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header   X-Forwarded-Proto $scheme;
-        proxy_cache_bypass $http_upgrade;
-    }
-}
-```
-
-Enable the site and reload Nginx:
-
-```bash
-sudo ln -s /etc/nginx/sites-available/safe-haven /etc/nginx/sites-enabled/
-sudo nginx -t && sudo systemctl reload nginx
-```
-
-The app is now live at `https://yourdomain.com`.
-
-### Step 6 — Updating the deployment
-
-```bash
-git pull origin main
-docker compose up -d --build
-```
-
-The entrypoint re-runs `drizzle-kit push` on every boot, so schema changes are applied automatically. The seed step is skipped on all subsequent starts.
-
-### Step 7 — Backups
-
-The SQLite database is stored in a Docker named volume (`db-data`). Back it up with:
-
-```bash
-docker run --rm \
-  -v lebanon-safe-haven_db-data:/data \
-  -v $(pwd):/backup \
-  alpine \
-  cp /data/sqlite.db /backup/sqlite-$(date +%Y%m%d-%H%M%S).db
-```
-
-Schedule this via cron for automated backups:
-
-```bash
-# Example: daily backup at 02:00
-crontab -e
-# Add:
-# 0 2 * * * cd /path/to/lebanon-safe-haven && docker run --rm -v lebanon-safe-haven_db-data:/data -v $(pwd):/backup alpine cp /data/sqlite.db /backup/sqlite-$(date +\%Y\%m\%d-\%H\%M\%S).db
-```
-
-## Environment Variable Reference
-
-| Variable         | Required in production | Description |
-|------------------|------------------------|-------------|
-| `SESSION_SECRET` | Yes | HMAC-SHA256 signing key for session cookies. Min 32 chars. Falls back to a dev-only default when unset — **never rely on the default in production**. |
-| `ENCRYPTION_KEY` | Yes | 64 hex chars (32 bytes) for AES-256-GCM phone number encryption. |
-| `NODE_ENV`       | Yes (set by Docker) | Must be `production` in deployed environments. |
-
-Generate `SESSION_SECRET` and `ENCRYPTION-KEY` with:
+Generate both with:
 
 ```bash
 openssl rand -hex 32
 ```
----
 
-## Project Reference
+For local dev, any placeholder values work. In production, generate real keys and never commit `.env`.
 
-### Stack
+## Stack
 
 | Layer | Tool |
 |-------|------|
@@ -387,19 +43,7 @@ openssl rand -hex 32
 | DB | SQLite via Drizzle ORM + better-sqlite3 |
 | Auth | bcrypt + HMAC-signed session cookies |
 
-### Scripts
-
-```bash
-npm run dev          # Hot-reload dev server (localhost:3000)
-npm run build        # Production build (outputs to .next/)
-npm run start        # Start built app (requires npm run build first)
-npm run lint         # ESLint
-npm run db:push      # Push schema to SQLite — idempotent, safe to re-run
-npm run db:seed      # Seed initial admin accounts (prints credentials once)
-npm run db:studio    # Drizzle Studio GUI
-```
-
-### Project Structure
+## Project Structure
 
 ```
 src/
@@ -407,10 +51,12 @@ src/
 │   ├── [locale]/             # All pages (ar/en)
 │   │   ├── page.tsx          # Landing — "I need help" / "I can help"
 │   │   ├── listings/         # Browse + detail view (filter by region + category)
+│   │   ├── map/              # Map view of all listings
 │   │   ├── offer/            # Submit a listing + success page
 │   │   ├── hotlines/         # Government emergency numbers
 │   │   ├── resources/        # NGO links (UNHCR, Red Cross, etc.)
-│   │   └── admin/            # Login + dashboard (verify/flag/phone management)
+│   │   ├── feedback/         # User feedback form
+│   │   └── admin/            # Login + dashboard
 │   └── api/                  # REST endpoints
 ├── components/               # Shared UI components
 ├── db/                       # Schema, connection, seed, admin CLI
@@ -422,7 +68,29 @@ messages/
 └── en.json                   # English translations
 ```
 
-### API Routes
+## Scripts
+
+```bash
+npm run dev          # Hot-reload dev server (localhost:3000)
+npm run build        # Production build
+npm run start        # Start built app
+npm run lint         # ESLint
+npm run db:push      # Push schema to SQLite (idempotent, safe to re-run)
+npm run db:seed      # Seed admin accounts (prints credentials once)
+npm run db:studio    # Drizzle Studio GUI at http://local.drizzle.studio
+```
+
+## Database
+
+Three tables in `sqlite.db`, managed by Drizzle ORM:
+
+- **listings** — id, phone (AES-256-GCM encrypted), region, category, area, capacity, description, status, edit_token, verified, verified_by, flag_count, latitude, longitude, timestamps
+- **municipalities** — id, name, region, role, username, password_hash, created_at
+- **flags** — id, listing_id, reason, created_at
+
+Schema changes: edit `src/db/schema.ts`, then run `npx drizzle-kit push`.
+
+## API Routes
 
 | Method | Route | Auth | Purpose |
 |--------|-------|------|---------|
@@ -439,48 +107,94 @@ messages/
 | `PATCH` | `/api/admin/listings/:id/phone` | session | Update phone (region-scoped) |
 | `DELETE` | `/api/admin/listings/:id` | session | Delete listing (region-scoped) |
 
-### Database Schema
+Listings are anonymous — creators get a UUID `editToken` instead of an account. No login required to post.
 
-Three tables in `sqlite.db`:
+## Admin System
 
-- **listings** — id, phone (AES-256-GCM encrypted), region, category, area, capacity, description, status, edit_token, verified, verified_by, flag_count, timestamps
-- **municipalities** — id, name, region, role (`superadmin` | `municipality`), username, password_hash, created_at
-- **flags** — id, listing_id, reason, created_at
-
-### Admin Roles
+### Roles
 
 | Role | Scope | Can delete? |
 |------|-------|-------------|
 | `superadmin` | All regions | Yes |
 | `municipality` | Own region only | Own region only |
 
-### Admin Access
+### Access
 
 - URL: `/ar/admin` or `/en/admin`
-- Credentials: printed by `db:seed` (local) or found in Docker logs (`docker compose logs app`)
-- Add more admins: `npx tsx src/db/add-admin.ts <username> <name> <region>`
-- Valid regions: `beirut` · `mount_lebanon` · `south_lebanon` · `nabatieh` · `bekaa` · `baalbek_hermel` · `akkar` · `north_lebanon`
+- Credentials: printed once by `npm run db:seed` (local) or in Docker logs (`docker compose logs app`)
+- Dashboard: verify listings, manage flags, edit phone numbers, delete listings
 
-### Security Measures
+### Adding admins
+
+```bash
+npx tsx src/db/add-admin.ts <username> <name> <region>
+
+# Examples:
+npx tsx src/db/add-admin.ts admin "Platform Admin" beirut
+npx tsx src/db/add-admin.ts tyre_admin "Tyre Municipality" south_lebanon
+```
+
+Valid regions: `beirut` `mount_lebanon` `south_lebanon` `nabatieh` `bekaa` `baalbek_hermel` `akkar` `north_lebanon`
+
+## Listing Categories
+
+| Category | Description |
+|----------|-------------|
+| `shelter` | Housing, rooms, beds (default) |
+| `food` | Meals, groceries, water |
+| `appliances` | Appliances, blankets, supplies |
+| `clothing` | Clothes, shoes |
+
+## Security
 
 | Measure | Detail |
 |---------|--------|
 | Session tokens | HMAC-SHA256 signed, timing-safe comparison |
 | Passwords | bcrypt (cost 10), random-generated in seed |
+| Phone encryption | AES-256-GCM at rest |
 | Login brute-force | 5 attempts / 15 min per IP |
 | Listing spam | 10 creates / hour per IP |
 | Flag abuse | 10 flags / hour per IP |
 | CSRF | Origin header validation on all POST/PATCH/DELETE |
 | Cookies | httpOnly, secure (prod), sameSite=strict, 24h expiry |
-| Region isolation | Admins can only verify/edit listings in their own region |
+| Region isolation | Municipality admins scoped to their own region |
 | User enumeration | Constant-time response (dummy hash on unknown user) |
 | Input validation | Phone regex, capacity bounds, category whitelist, text length limits |
 | SQL injection | Drizzle ORM parameterised queries throughout |
 
-### PII
+Only stored PII is **phone numbers**, encrypted at rest. No user accounts, emails, names, or tracking.
 
-Only stored PII is **phone numbers**, AES-256-GCM encrypted in the listings table. No user accounts, emails, names, or tracking. Listing creators receive a UUID edit token instead of an account.
+## Docker
+
+Production deployment uses Docker + Nginx reverse proxy. The `docker-entrypoint.sh` handles schema migration and first-boot seeding automatically.
+
+```bash
+cp .example.env .env              # fill in real SESSION_SECRET and ENCRYPTION_KEY
+docker compose up -d --build
+docker compose logs app           # retrieve first-run admin credentials
+```
+
+The SQLite database lives in a Docker named volume (`db-data`). Back it up with:
+
+```bash
+docker run --rm -v lebanon-safe-haven_db-data:/data -v $(pwd):/backup alpine cp /data/sqlite.db /backup/sqlite-backup.db
+```
+
+## Locale Note
+
+Every server component page calls `setRequestLocale(locale)` before `getTranslations()` — required due to a Next.js 16 issue where the middleware locale header doesn't propagate. See `src/app/[locale]/layout.tsx`.
 
 ## Changelog
+
+### v0.2.0
+
+- Admin bulk listing management (create, bulk delete, unflag)
+- Map integration (view all listings on map, select location when posting)
+- Feedback system for user submissions
+- Dockerized production deployment with auto-migration entrypoint
+- AES-256-GCM phone number encryption at rest
+- Search now matches region names (translated)
+
 ### v0.1.0
-- Initial development effort of the platform
+
+- Initial platform: listings, admin dashboard, flagging, i18n (AR/EN)
