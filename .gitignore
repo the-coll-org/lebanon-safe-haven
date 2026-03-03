@@ -3,6 +3,7 @@
 # dependencies
 /node_modules
 /.pnp
+/.admin-deps/node_modules
 .pnp.*
 .yarn/*
 !.yarn/patches
