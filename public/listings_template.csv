@@ -1,0 +1,11 @@
+phone,region,capacity,category,area,description,latitude,longitude
+03-123456,beirut,5,shelter,Ashrafieh,2 bedroom apartment with kitchen,33.8938,35.5018
+03-789012,south_lebanon,50,food,Tyre,Hot meals available daily - breakfast and dinner,33.2700,35.2033
+03-345678,mount_lebanon,10,clothing,Jounieh,Winter clothes and blankets available,33.9808,35.6184
+03-901234,north_lebanon,3,shelter,Tripoli,Guest room with bathroom,34.4381,35.8308
+03-567890,bekaa,20,appliances,Zahle,Microwave and refrigerator available,33.8467,35.9033
+03-234567,nabatieh,15,food,Nabatieh,Fresh bread and pastries daily,33.3783,35.4833
+03-876543,baalbek_hermel,8,shelter,Baalbek,Spacious house with garden,34.0058,36.2181
+03-432109,akkar,12,clothing,Halba,Children's clothing and shoes,34.5439,36.0797
+03-654321,beirut,100,food,Hamra,Large quantity of canned food available,33.8969,35.4785
+03-987654,south_lebanon,6,shelter,Saida,Apartment suitable for family,33.5611,35.3719

@@ -23,6 +23,7 @@ import {
   UtensilsCrossed,
   Plug,
   Shirt,
+  Navigation,
 } from "lucide-react";
 import type { Listing } from "@/types";
 
@@ -49,6 +50,7 @@ export default function ListingDetailPage() {
   const tc = useTranslations("common");
   const tr = useTranslations("regions");
   const tcat = useTranslations("categories");
+  const tm = useTranslations("map");
 
   const [listing, setListing] = useState<Listing | null>(null);
   const [loading, setLoading] = useState(true);
@@ -168,6 +170,19 @@ export default function ListingDetailPage() {
               locale === "ar" ? "ar-LB" : "en-US"
             )}
           </p>
+
+          {listing.latitude != null && listing.longitude != null && (
+            <Button variant="outline" className="w-full gap-2" asChild>
+              <a
+                href={`https://www.google.com/maps/dir/?api=1&destination=${listing.latitude},${listing.longitude}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Navigation className="h-4 w-4" />
+                {tm("getDirections")}
+              </a>
+            </Button>
+          )}
 
           <Separator />
 

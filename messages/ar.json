@@ -2,7 +2,7 @@
   "common": {
     "appName": "ملاذ آمن",
     "tagline": "نربط النازحين بالمساعدات المتاحة",
-    "disclaimer": "ملاذ آمن يسهّل التواصل فقط. لا نتحقق من الأفراد، ولا نضمن السلامة، ولا نتحمل أي مسؤولية. يرجى توخي الحذر دائماً.",
+    "disclaimer": "تنبيه أمني مهم: تم تطوير هذه المنصة بسرعة لربط الأشخاص الذين يحتاجون إلى المساعدة بأولئك الذين يقدمونها. لم يتم اختبار المنصة وتعزيزها من حيث الأمان وخصوصية البيانات. لا تشارك أي معلومات لا تريد الإفصاح عنها علنًا. أي معلومات تقدمها ستكون متاحة للعموم. تصرف بحذر.",
     "loading": "جاري التحميل...",
     "error": "حدث خطأ",
     "back": "رجوع",
@@ -21,9 +21,11 @@
     "home": "الرئيسية",
     "listings": "الإعلانات",
     "offer": "أريد المساعدة",
+    "map": "الخريطة",
     "hotlines": "خطوط الطوارئ",
     "resources": "موارد",
-    "admin": "البلدية"
+    "admin": "البلدية",
+    "feedback": "ملاحظات"
   },
   "home": {
     "heroTitle": "هل تحتاج مساعدة؟",
@@ -80,7 +82,10 @@
     "description": "وصف إضافي",
     "descriptionPlaceholder": "مثال: غرفتان متاحتان، يُفضّل عائلات",
     "submitOffer": "نشر الإعلان",
-    "phoneDisclaimer": "سيظهر رقم هاتفك للباحثين عن مساعدة. لا نجمع أي بيانات شخصية أخرى."
+    "phoneDisclaimer": "سيظهر رقم هاتفك للباحثين عن مساعدة. لا نجمع أي بيانات شخصية أخرى.",
+    "location": "حدّد الموقع على الخريطة",
+    "locationHelper": "انقر على الخريطة لتحديد الموقع الدقيق (اختياري)",
+    "clearPin": "إزالة العلامة"
   },
   "offerSuccess": {
     "title": "تم نشر إعلانك بنجاح!",
@@ -128,7 +133,42 @@
     "status": "الحالة",
     "capacity": "السعة",
     "area": "الحي",
-    "description": "الوصف"
+    "description": "الوصف",
+    "createListing": "إنشاء إعلان جديد",
+    "creating": "جاري الإنشاء...",
+    "allListings": "جميع الإعلانات",
+    "areaPlaceholder": "مثال: الأشرفية",
+    "descriptionPlaceholder": "مثال: غرفتان متاحتان",
+    "importListings": "استيراد الإعلانات",
+    "importDescription": "رفع ملف CSV لإضافة إعلانات متعددة",
+    "uploadCSV": "رفع ملف CSV",
+    "downloadTemplate": "تحميل قالب CSV",
+    "importing": "جاري الاستيراد...",
+    "importResults": "تم استيراد {success} من {total} إعلان (فشل: {failed})",
+    "moreErrors": "المزيد من الأخطاء...",
+    "csvTemplateTitle": "قالب الملف",
+    "csvTemplateDescription": "يجب أن يحتوي الملف على الأعمدة التالية (CSV):",
+    "validRegions": "المناطق المتاحة",
+    "validCategories": "الأنواع المتاحة",
+    "selected": "محدد",
+    "selectedCount": "{count} محدد",
+    "selectAll": "تحديد الكل",
+    "deselectAll": "إلغاء التحديد",
+    "bulkActions": "إجراءات جماعية",
+    "deleteSelected": "حذف المحدد",
+    "deleteAll": "حذف الكل",
+    "confirmDeleteAll": "تأكيد حذف الكل",
+    "deleteAllWarning": "سيتم حذف {count} إعلان نهائياً. لا يمكن التراجع عن هذا الإجراء.",
+    "confirmDelete": "تأكيد الحذف",
+    "cancel": "إلغاء",
+    "unflag": "إلغاء التبليغ",
+    "viewFeedback": "عرض الملاحظات",
+    "feedbackTitle": "الملاحظات الواردة",
+    "noFeedback": "لا توجد ملاحظات",
+    "adminUser": "مسؤول",
+    "prev": "السابق",
+    "next": "التالي",
+    "pagination": "{start} - {end} من {total}"
   },
   "flag": {
     "title": "الإبلاغ عن هذا الإعلان",
@@ -136,6 +176,18 @@
     "reasonPlaceholder": "مثال: معلومات غير صحيحة",
     "submit": "إرسال البلاغ",
     "success": "تم إرسال البلاغ. شكراً لمساعدتنا."
+  },
+  "map": {
+    "title": "عرض الخريطة",
+    "loading": "جاري تحميل الخريطة...",
+    "viewDetails": "عرض التفاصيل",
+    "getDirections": "الاتجاهات",
+    "approximateLocation": "موقع تقريبي",
+    "verified": "موثّق",
+    "legendShelter": "مأوى",
+    "legendFood": "طعام",
+    "legendAppliances": "أجهزة",
+    "legendClothing": "ملابس"
   },
   "regions": {
     "mount_lebanon": "جبل لبنان",
@@ -146,5 +198,29 @@
     "baalbek_hermel": "بعلبك - الهرمل",
     "akkar": "عكار",
     "north_lebanon": "شمال لبنان"
+  },
+  "feedback": {
+    "title": "تقديم ملاحظات",
+    "subtitle": "ساعدنا على تحسين المنصة - نرحب بملاحظاتك",
+    "category": "نوع الملاحظة",
+    "selectCategory": "اختر نوع الملاحظة",
+    "categories": {
+      "general": "عام",
+      "bug": "خلل تقني",
+      "feature": "اقتراح ميزة جديدة",
+      "complaint": "شكوى",
+      "other": "أخرى"
+    },
+    "name": "الاسم (اختياري)",
+    "namePlaceholder": "اسمك",
+    "email": "البريد الإلكتروني (اختياري)",
+    "emailPlaceholder": "your@email.com",
+    "message": "الرسالة",
+    "messagePlaceholder": "اكتب ملاحظاتك هنا...",
+    "messageHint": "الرسالة يجب أن تكون بين {min} و {max} حرف",
+    "submit": "إرسال الملاحظات",
+    "submitting": "جاري الإرسال...",
+    "success": "تم إرسال الملاحظات بنجاح، شكراً لك!",
+    "error": "حدث خطأ أثناء إرسال الملاحظات"
   }
 }

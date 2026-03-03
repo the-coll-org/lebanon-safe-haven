@@ -1,6 +1,5 @@
 "use client";
 
-import { useTranslations } from "next-intl";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Phone } from "lucide-react";
@@ -12,7 +11,6 @@ interface HotlineCardProps {
 }
 
 export function HotlineCard({ hotline, locale }: HotlineCardProps) {
-  const t = useTranslations("hotlines");
 
   return (
     <Card>

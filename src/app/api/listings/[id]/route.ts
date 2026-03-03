@@ -17,7 +17,7 @@ export async function GET(
   }
 
   // Decrypt phone, strip editToken from public response
-  const { editToken, ...safe } = listing;
+  const { editToken, ...safe } = listing; // eslint-disable-line @typescript-eslint/no-unused-vars
   return NextResponse.json({ ...safe, phone: decryptPhone(listing.phone) });
 }
 
@@ -30,7 +30,7 @@ export async function PATCH(
 
   const { id } = await params;
   const body = await request.json();
-  const { editToken, status, description, capacity } = body;
+  const { editToken, status, description, capacity, latitude, longitude } = body;
 
   if (!editToken) {
     return NextResponse.json(
@@ -62,6 +62,23 @@ export async function PATCH(
     const cap = Number(capacity);
     if (Number.isInteger(cap) && cap >= 1 && cap <= 10000)
       updates.capacity = cap;
+  }
+  if (latitude !== undefined && longitude !== undefined) {
+    if (latitude === null || longitude === null) {
+      updates.latitude = null;
+      updates.longitude = null;
+    } else {
+      const lat = Number(latitude);
+      const lng = Number(longitude);
+      if (
+        !isNaN(lat) && !isNaN(lng) &&
+        lat >= 33.0 && lat <= 34.7 &&
+        lng >= 35.0 && lng <= 36.7
+      ) {
+        updates.latitude = lat;
+        updates.longitude = lng;
+      }
+    }
   }
 
   db.update(listings).set(updates).where(eq(listings.id, id)).run();

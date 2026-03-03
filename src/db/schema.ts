@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
+import { sqliteTable, text, integer, real } from "drizzle-orm/sqlite-core";
 
 export const listings = sqliteTable("listings", {
   id: text("id").primaryKey(),
@@ -13,6 +13,8 @@ export const listings = sqliteTable("listings", {
   verified: integer("verified", { mode: "boolean" }).notNull().default(false),
   verifiedBy: text("verified_by"),
   flagCount: integer("flag_count").notNull().default(0),
+  latitude: real("latitude"),
+  longitude: real("longitude"),
   createdAt: text("created_at").notNull(),
   updatedAt: text("updated_at").notNull(),
 });
@@ -33,5 +35,16 @@ export const flags = sqliteTable("flags", {
     .notNull()
     .references(() => listings.id),
   reason: text("reason"),
+  createdAt: text("created_at").notNull(),
+});
+
+export const feedback = sqliteTable("feedback", {
+  id: text("id").primaryKey(),
+  name: text("name"),
+  email: text("email"),
+  message: text("message").notNull(),
+  category: text("category").notNull().default("general"),
+  userType: text("user_type").notNull().default("guest"),
+  municipalityId: text("municipality_id").references(() => municipalities.id),
   createdAt: text("created_at").notNull(),
 });

@@ -2,7 +2,7 @@
   "common": {
     "appName": "Safe Haven",
     "tagline": "Connecting displaced people with available relief",
-    "disclaimer": "Safe Haven facilitates connections only. We do not vet individuals, guarantee safety, or assume liability. Always exercise caution.",
+    "disclaimer": "IMPORTANT SECURITY NOTICE: This platform was quickly developed to connect people who need help with those who offer help. The platform has not been tested and hardened for security and data privacy. Do NOT share any information you are not comfortable sharing publicly. Any information you provide will be publicly available. Proceed with caution.",
     "loading": "Loading...",
     "error": "An error occurred",
     "back": "Back",
@@ -21,9 +21,11 @@
     "home": "Home",
     "listings": "Listings",
     "offer": "Offer Help",
+    "map": "Map",
     "hotlines": "Hotlines",
     "resources": "Resources",
-    "admin": "Municipality"
+    "admin": "Municipality",
+    "feedback": "Feedback"
   },
   "home": {
     "heroTitle": "Need Help?",
@@ -80,7 +82,10 @@
     "description": "Additional description",
     "descriptionPlaceholder": "e.g. 2 rooms available, families preferred",
     "submitOffer": "Post Listing",
-    "phoneDisclaimer": "Your phone number will be visible to people looking for help. We do not collect any other personal data."
+    "phoneDisclaimer": "Your phone number will be visible to people looking for help. We do not collect any other personal data.",
+    "location": "Pin location on map",
+    "locationHelper": "Click on the map to mark the exact location (optional)",
+    "clearPin": "Clear pin"
   },
   "offerSuccess": {
     "title": "Your listing has been posted!",
@@ -128,7 +133,42 @@
     "status": "Status",
     "capacity": "Capacity",
     "area": "Area",
-    "description": "Description"
+    "description": "Description",
+    "createListing": "Create New Listing",
+    "creating": "Creating...",
+    "allListings": "All Listings",
+    "areaPlaceholder": "e.g. Ashrafieh",
+    "descriptionPlaceholder": "e.g. 2 rooms available",
+    "importListings": "Import Listings",
+    "importDescription": "Upload a CSV file to add multiple listings",
+    "uploadCSV": "Upload CSV File",
+    "downloadTemplate": "Download CSV Template",
+    "importing": "Importing...",
+    "importResults": "Imported {success} of {total} listings ({failed} failed)",
+    "moreErrors": "more errors...",
+    "csvTemplateTitle": "File Template",
+    "csvTemplateDescription": "File must contain the following columns (CSV):",
+    "validRegions": "Valid Regions",
+    "validCategories": "Valid Categories",
+    "selected": "selected",
+    "selectedCount": "{count} selected",
+    "selectAll": "Select All",
+    "deselectAll": "Deselect All",
+    "bulkActions": "Bulk Actions",
+    "deleteSelected": "Delete Selected",
+    "deleteAll": "Delete All",
+    "confirmDeleteAll": "Confirm Delete All",
+    "deleteAllWarning": "This will permanently delete {count} listings. This action cannot be undone.",
+    "confirmDelete": "Confirm Delete",
+    "cancel": "Cancel",
+    "unflag": "Unflag",
+    "viewFeedback": "View Feedback",
+    "feedbackTitle": "Feedback Received",
+    "noFeedback": "No feedback yet",
+    "adminUser": "Admin",
+    "prev": "Previous",
+    "next": "Next",
+    "pagination": "{start} - {end} of {total}"
   },
   "flag": {
     "title": "Report this listing",
@@ -136,6 +176,18 @@
     "reasonPlaceholder": "e.g. Incorrect information",
     "submit": "Submit Report",
     "success": "Report submitted. Thank you for helping."
+  },
+  "map": {
+    "title": "Map View",
+    "loading": "Loading map...",
+    "viewDetails": "View details",
+    "getDirections": "Get directions",
+    "approximateLocation": "Approximate location",
+    "verified": "Verified",
+    "legendShelter": "Shelter",
+    "legendFood": "Food",
+    "legendAppliances": "Appliances",
+    "legendClothing": "Clothing"
   },
   "regions": {
     "mount_lebanon": "Mount Lebanon",
@@ -146,5 +198,29 @@
     "baalbek_hermel": "Baalbek-Hermel",
     "akkar": "Akkar",
     "north_lebanon": "North Lebanon"
+  },
+  "feedback": {
+    "title": "Provide Feedback",
+    "subtitle": "Help us improve the platform - we value your feedback",
+    "category": "Feedback Type",
+    "selectCategory": "Select feedback type",
+    "categories": {
+      "general": "General",
+      "bug": "Bug Report",
+      "feature": "Feature Request",
+      "complaint": "Complaint",
+      "other": "Other"
+    },
+    "name": "Name (optional)",
+    "namePlaceholder": "Your name",
+    "email": "Email (optional)",
+    "emailPlaceholder": "your@email.com",
+    "message": "Message",
+    "messagePlaceholder": "Write your feedback here...",
+    "messageHint": "Message must be between {min} and {max} characters",
+    "submit": "Submit Feedback",
+    "submitting": "Submitting...",
+    "success": "Feedback submitted successfully, thank you!",
+    "error": "An error occurred while submitting feedback"
   }
 }
