@@ -13,6 +13,25 @@ npm run db:seed              # Create admin accounts (prints passwords — save 
 npm run dev                  # http://localhost:3000
 ```
 
+## Environment Variables
+
+Copy `.example.env` to `.env` and fill in the values:
+
+```bash
+cp .example.env .env
+```
+
+| Variable | Purpose |
+|----------|---------|
+| `SESSION_SECRET` | Signs admin session cookies (HMAC-SHA256) |
+| `ENCRYPTION_KEY` | Encrypts phone numbers at rest in the database |
+
+Generate both with:
+
+```bash
+openssl rand -hex 32
+```
+
 ## Stack
 
 | Layer | Tool |
