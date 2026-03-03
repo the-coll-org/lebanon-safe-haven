@@ -360,18 +360,6 @@ crontab -e
 # 0 2 * * * cd /path/to/lebanon-safe-haven && docker run --rm -v lebanon-safe-haven_db-data:/data -v $(pwd):/backup alpine cp /data/sqlite.db /backup/sqlite-$(date +\%Y\%m\%d-\%H\%M\%S).db
 ```
 
-### Optional — Cloudflare DDoS Protection (free tier)
-
-1. Create a free account at [cloudflare.com](https://cloudflare.com) and add your domain.
-2. Update your domain's nameservers to those Cloudflare provides.
-3. In the Cloudflare dashboard:
-   - **SSL/TLS** → Full (strict)
-   - **Security** → Security Level → Medium (or "I'm Under Attack" during active DDoS)
-   - **Speed** → Auto Minify → enable JS/CSS/HTML
-4. No code changes needed — Cloudflare proxies all traffic and provides unlimited DDoS mitigation, WAF, CDN, and bot management on the free tier.
-
----
-
 ## Environment Variable Reference
 
 | Variable         | Required in production | Description |
@@ -380,6 +368,11 @@ crontab -e
 | `ENCRYPTION_KEY` | Yes | 64 hex chars (32 bytes) for AES-256-GCM phone number encryption. |
 | `NODE_ENV`       | Yes (set by Docker) | Must be `production` in deployed environments. |
 
+Generate `SESSION_SECRET` and `ENCRYPTION-KEY` with:
+
+```bash
+openssl rand -hex 32
+```
 ---
 
 ## Project Reference
