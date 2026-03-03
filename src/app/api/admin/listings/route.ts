@@ -5,6 +5,7 @@ import { listings } from "@/db/schema";
 import { getSession } from "@/lib/auth";
 import { validateOrigin } from "@/lib/csrf";
 import { encryptPhone } from "@/lib/crypto";
+import { createLog } from "@/lib/logging";
 import { REGION_LIST, LISTING_CATEGORIES, REGIONS } from "@/lib/constants";
 import { v4 as uuid } from "uuid";
 
@@ -157,6 +158,20 @@ export async function POST(request: NextRequest) {
   };
 
   await db.insert(listings).values(listing);
+
+  // Log listing creation
+  const forwardedFor = request.headers.get("x-forwarded-for");
+  const ipAddress = forwardedFor ? forwardedFor.split(",")[0].trim() : "127.0.0.1";
+  await createLog({
+    action: "create",
+    entityType: "listing",
+    entityId: id,
+    userId: session.id,
+    userName: session.name,
+    details: `Created ${cat} listing in ${region} with capacity ${cap}`,
+    ipAddress,
+    userAgent: request.headers.get("user-agent") || undefined,
+  });
 
   return NextResponse.json({ id, editToken }, { status: 201 });
 }
@@ -342,6 +357,19 @@ export async function PATCH(request: NextRequest) {
         results.errors.push(`Error processing row: ${err instanceof Error ? err.message : String(err)}`);
       }
     }
+
+    // Log bulk import
+    const forwardedFor = request.headers.get("x-forwarded-for");
+    const ipAddress = forwardedFor ? forwardedFor.split(",")[0].trim() : "127.0.0.1";
+    await createLog({
+      action: "create",
+      entityType: "listing",
+      userId: session.id,
+      userName: session.name,
+      details: `Bulk import: ${results.success} created, ${results.failed} failed out of ${jsonData.length} total`,
+      ipAddress,
+      userAgent: request.headers.get("user-agent") || undefined,
+    });
 
     return NextResponse.json({
       success: results.success,

@@ -4,6 +4,7 @@ import { listings, flags } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
 import { validateOrigin } from "@/lib/csrf";
+import { createLog } from "@/lib/logging";
 import { REGION_LIST, LISTING_CATEGORIES, LISTING_STATUSES } from "@/lib/constants";
 import { encryptPhone } from "@/lib/crypto";
 
@@ -55,6 +56,20 @@ export async function PATCH(
     await db.update(listings)
       .set({ flagCount: 0, updatedAt: new Date() })
       .where(eq(listings.id, id));
+
+    // Log unflag action
+    const forwardedFor = request.headers.get("x-forwarded-for");
+    const ipAddress = forwardedFor ? forwardedFor.split(",")[0].trim() : "127.0.0.1";
+    await createLog({
+      action: "unflag",
+      entityType: "listing",
+      entityId: id,
+      userId: session.id,
+      userName: session.name,
+      details: `Unflagged listing in ${listing.region}`,
+      ipAddress,
+      userAgent: request.headers.get("user-agent") || undefined,
+    });
 
     return NextResponse.json({ success: true });
   }
@@ -114,6 +129,20 @@ export async function PATCH(
 
   await db.update(listings).set(updates).where(eq(listings.id, id));
 
+  // Log update action
+  const forwardedFor = request.headers.get("x-forwarded-for");
+  const ipAddress = forwardedFor ? forwardedFor.split(",")[0].trim() : "127.0.0.1";
+  await createLog({
+    action: "update",
+    entityType: "listing",
+    entityId: id,
+    userId: session.id,
+    userName: session.name,
+    details: `Updated listing in ${listing.region}. Fields: ${Object.keys(updates).join(", ")}`,
+    ipAddress,
+    userAgent: request.headers.get("user-agent") || undefined,
+  });
+
   return NextResponse.json({ success: true });
 }
 
@@ -148,6 +177,20 @@ export async function DELETE(
   // Delete associated flags first (FK constraint)
   await db.delete(flags).where(eq(flags.listingId, id));
   await db.delete(listings).where(eq(listings.id, id));
+
+  // Log deletion
+  const forwardedFor = request.headers.get("x-forwarded-for");
+  const ipAddress = forwardedFor ? forwardedFor.split(",")[0].trim() : "127.0.0.1";
+  await createLog({
+    action: "delete",
+    entityType: "listing",
+    entityId: id,
+    userId: session.id,
+    userName: session.name,
+    details: `Deleted ${listing.category} listing in ${listing.region}`,
+    ipAddress,
+    userAgent: request.headers.get("user-agent") || undefined,
+  });
 
   return NextResponse.json({ success: true });
 }

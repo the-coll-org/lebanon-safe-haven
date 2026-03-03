@@ -168,7 +168,47 @@
     "adminUser": "مسؤول",
     "prev": "السابق",
     "next": "التالي",
-    "pagination": "{start} - {end} من {total}"
+    "pagination": "{start} - {end} من {total}",
+    "createUser": "إنشاء مستخدم",
+    "createUserTitle": "إنشاء مستخدم إداري جديد",
+    "creatingUser": "جاري الإنشاء...",
+    "name": "الاسم",
+    "namePlaceholder": "مثال: مسؤول البلدية",
+    "usernamePlaceholder": "مثال: beirut_admin",
+    "usernameHint": "3-30 حرف، حروف، أرقام، شرطات سفلية وشرطات فقط",
+    "role": "الدور",
+    "roleMunicipality": "بلدية",
+    "roleSuperadmin": "مدير عام",
+    "createUserError": "فشل إنشاء المستخدم",
+    "userCreatedSuccess": "تم إنشاء المستخدم بنجاح!",
+    "saveCredentials": "احفظ بيانات الاعتماد — لا يمكن استعادة كلمة المرور!",
+    "createAnotherUser": "إنشاء مستخدم آخر",
+    "viewLogs": "عرض السجلات",
+    "logsTitle": "سجلات نشاط المشرفين",
+    "noLogs": "لا توجد سجلات"
+  },
+  "logs": {
+    "filterAction": "تصفية حسب الإجراء",
+    "filterEntity": "تصفية حسب النوع",
+    "actions": {
+      "all": "جميع الإجراءات",
+      "login": "تسجيل دخول",
+      "logout": "تسجيل خروج",
+      "create": "إنشاء",
+      "update": "تحديث",
+      "delete": "حذف",
+      "verify": "توثيق",
+      "unflag": "إلغاء التبليغ",
+      "bulk_delete": "حذف جماعي"
+    },
+    "entities": {
+      "all": "جميع الأنواع",
+      "listing": "إعلان",
+      "user": "مستخدم",
+      "flag": "بلاغ",
+      "feedback": "ملاحظة",
+      "auth": "مصادقة"
+    }
   },
   "flag": {
     "title": "الإبلاغ عن هذا الإعلان",

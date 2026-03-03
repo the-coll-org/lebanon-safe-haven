@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { authenticateAdmin, createSession, clearSession } from "@/lib/auth";
+import { authenticateAdmin, createSession, clearSession, getSession } from "@/lib/auth";
 import { rateLimit } from "@/lib/rate-limit";
 import { validateOrigin } from "@/lib/csrf";
+import { createLog } from "@/lib/logging";
 
 export async function POST(request: NextRequest) {
   const csrf = validateOrigin(request);
@@ -28,6 +29,18 @@ export async function POST(request: NextRequest) {
   const municipality = await authenticateAdmin(username, password);
 
   if (!municipality) {
+    // Log failed login attempt
+    const forwardedFor = request.headers.get("x-forwarded-for");
+    const ipAddress = forwardedFor ? forwardedFor.split(",")[0].trim() : "127.0.0.1";
+    await createLog({
+      action: "login",
+      entityType: "auth",
+      userName: username,
+      details: "Failed login attempt",
+      ipAddress,
+      userAgent: request.headers.get("user-agent") || undefined,
+    });
+
     return NextResponse.json(
       { error: "Invalid credentials" },
       { status: 401 }
@@ -36,6 +49,19 @@ export async function POST(request: NextRequest) {
 
   await createSession(municipality.id);
 
+  // Log successful login
+  const forwardedFor = request.headers.get("x-forwarded-for");
+  const ipAddress = forwardedFor ? forwardedFor.split(",")[0].trim() : "127.0.0.1";
+  await createLog({
+    action: "login",
+    entityType: "auth",
+    userId: municipality.id,
+    userName: municipality.name,
+    details: "Successful login",
+    ipAddress,
+    userAgent: request.headers.get("user-agent") || undefined,
+  });
+
   return NextResponse.json({
     id: municipality.id,
     name: municipality.name,
@@ -43,7 +69,25 @@ export async function POST(request: NextRequest) {
   });
 }
 
-export async function DELETE() {
+export async function DELETE(request: NextRequest) {
+  // Get current session before clearing it
+  const session = await getSession();
+
+  if (session) {
+    // Log logout
+    const forwardedFor = request.headers.get("x-forwarded-for");
+    const ipAddress = forwardedFor ? forwardedFor.split(",")[0].trim() : "127.0.0.1";
+    await createLog({
+      action: "logout",
+      entityType: "auth",
+      userId: session.id,
+      userName: session.name,
+      details: "User logged out",
+      ipAddress,
+      userAgent: request.headers.get("user-agent") || undefined,
+    });
+  }
+
   await clearSession();
   return NextResponse.json({ success: true });
 }

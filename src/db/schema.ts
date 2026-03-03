@@ -48,3 +48,16 @@ export const feedback = pgTable("feedback", {
   municipalityId: text("municipality_id").references(() => municipalities.id, { onDelete: "set null" }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull(),
 });
+
+export const adminLogs = pgTable("admin_logs", {
+  id: text("id").primaryKey(),
+  action: text("action").notNull(),
+  entityType: text("entity_type").notNull(),
+  entityId: text("entity_id"),
+  userId: text("user_id").references(() => municipalities.id, { onDelete: "set null" }),
+  userName: text("user_name"),
+  details: text("details"),
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull(),
+});

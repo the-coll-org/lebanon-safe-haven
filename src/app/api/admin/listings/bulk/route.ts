@@ -4,6 +4,7 @@ import { listings, flags } from "@/db/schema";
 import { inArray } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
 import { validateOrigin } from "@/lib/csrf";
+import { createLog } from "@/lib/logging";
 
 export async function DELETE(request: NextRequest) {
   const csrf = validateOrigin(request);
@@ -39,9 +40,22 @@ export async function DELETE(request: NextRequest) {
       // Delete all listings
       await db.delete(listings);
 
-      return NextResponse.json({ 
-        success: true, 
-        deleted: allIds.length 
+      // Log bulk delete all
+      const forwardedFor = request.headers.get("x-forwarded-for");
+      const ipAddress = forwardedFor ? forwardedFor.split(",")[0].trim() : "127.0.0.1";
+      await createLog({
+        action: "bulk_delete",
+        entityType: "listing",
+        userId: session.id,
+        userName: session.name,
+        details: `Bulk deleted all ${allIds.length} listings`,
+        ipAddress,
+        userAgent: request.headers.get("user-agent") || undefined,
+      });
+
+      return NextResponse.json({
+        success: true,
+        deleted: allIds.length
       });
     }
 
@@ -84,6 +98,19 @@ export async function DELETE(request: NextRequest) {
 
     // Delete the listings
     await db.delete(listings).where(inArray(listings.id, allowedIds));
+
+    // Log bulk delete
+    const forwardedFor = request.headers.get("x-forwarded-for");
+    const ipAddress = forwardedFor ? forwardedFor.split(",")[0].trim() : "127.0.0.1";
+    await createLog({
+      action: "bulk_delete",
+      entityType: "listing",
+      userId: session.id,
+      userName: session.name,
+      details: `Bulk deleted ${allowedIds.length} listings (${forbiddenIds.length} skipped due to permissions)`,
+      ipAddress,
+      userAgent: request.headers.get("user-agent") || undefined,
+    });
 
     return NextResponse.json({
       success: true,

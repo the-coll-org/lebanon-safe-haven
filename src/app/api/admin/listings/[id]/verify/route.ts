@@ -4,6 +4,7 @@ import { listings } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
 import { validateOrigin } from "@/lib/csrf";
+import { createLog } from "@/lib/logging";
 
 export async function PATCH(
   request: NextRequest,
@@ -50,6 +51,20 @@ export async function PATCH(
       updatedAt: new Date(),
     })
     .where(eq(listings.id, id));
+
+  // Log verification
+  const forwardedFor = request.headers.get("x-forwarded-for");
+  const ipAddress = forwardedFor ? forwardedFor.split(",")[0].trim() : "127.0.0.1";
+  await createLog({
+    action: "verify",
+    entityType: "listing",
+    entityId: id,
+    userId: session.id,
+    userName: session.name,
+    details: `Verified shelter listing in ${listing.region}`,
+    ipAddress,
+    userAgent: request.headers.get("user-agent") || undefined,
+  });
 
   return NextResponse.json({ success: true });
 }

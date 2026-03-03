@@ -168,7 +168,47 @@
     "adminUser": "Admin",
     "prev": "Previous",
     "next": "Next",
-    "pagination": "{start} - {end} of {total}"
+    "pagination": "{start} - {end} of {total}",
+    "createUser": "Create User",
+    "createUserTitle": "Create New Admin User",
+    "creatingUser": "Creating...",
+    "name": "Name",
+    "namePlaceholder": "e.g. Municipality Admin",
+    "usernamePlaceholder": "e.g. beirut_admin",
+    "usernameHint": "3-30 characters, letters, numbers, underscores, and hyphens only",
+    "role": "Role",
+    "roleMunicipality": "Municipality",
+    "roleSuperadmin": "Super Admin",
+    "createUserError": "Failed to create user",
+    "userCreatedSuccess": "User created successfully!",
+    "saveCredentials": "Save these credentials — the password cannot be recovered!",
+    "createAnotherUser": "Create Another User",
+    "viewLogs": "View Logs",
+    "logsTitle": "Admin Activity Logs",
+    "noLogs": "No logs found"
+  },
+  "logs": {
+    "filterAction": "Filter by action",
+    "filterEntity": "Filter by entity",
+    "actions": {
+      "all": "All Actions",
+      "login": "Login",
+      "logout": "Logout",
+      "create": "Create",
+      "update": "Update",
+      "delete": "Delete",
+      "verify": "Verify",
+      "unflag": "Unflag",
+      "bulk_delete": "Bulk Delete"
+    },
+    "entities": {
+      "all": "All Entities",
+      "listing": "Listing",
+      "user": "User",
+      "flag": "Flag",
+      "feedback": "Feedback",
+      "auth": "Authentication"
+    }
   },
   "flag": {
     "title": "Report this listing",

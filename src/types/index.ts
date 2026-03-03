@@ -60,3 +60,16 @@ export interface RegionHotline {
   nameEn: string;
   numbers: HotlineNumber[];
 }
+
+export interface AdminLog {
+  id: string;
+  action: string;
+  entityType: string;
+  entityId: string | null;
+  userId: string | null;
+  userName: string | null;
+  details: string | null;
+  ipAddress: string | null;
+  userAgent: string | null;
+  createdAt: string;
+}

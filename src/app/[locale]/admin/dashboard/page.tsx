@@ -13,6 +13,8 @@ import { AdminEditDialog } from "@/components/admin-edit-dialog";
 import { AdminCreateDialog } from "@/components/admin-create-dialog";
 import { ImportExportDialog } from "@/components/import-export-dialog";
 import { FeedbackDialog } from "@/components/feedback-dialog";
+import { CreateUserDialog } from "@/components/create-user-dialog";
+import { LogsDialog } from "@/components/logs-dialog";
 import {
   BadgeCheck,
   LogOut,
@@ -355,13 +357,15 @@ export default function AdminDashboardPage() {
       )}
 
       {/* Create Listing & Import/Export Buttons */}
-      <div className="flex gap-2 mb-6">
+      <div className="flex gap-2 mb-6 flex-wrap">
         <AdminCreateDialog 
           onCreated={refreshListings} 
           defaultRegion={isSuperadmin ? null : adminRegion}
         />
         <ImportExportDialog onImportSuccess={refreshListings} />
         <FeedbackDialog />
+        {isSuperadmin && <CreateUserDialog />}
+        {isSuperadmin && <LogsDialog />}
       </div>
 
       {/* Bulk Actions */}
