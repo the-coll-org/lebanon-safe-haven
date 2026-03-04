@@ -26,6 +26,10 @@ export const municipalities = pgTable("municipalities", {
   role: text("role").notNull().default("municipality"),
   username: text("username").notNull().unique(),
   passwordHash: text("password_hash").notNull(),
+  // RBAC: Multiple regions for regional_admin role
+  assignedRegions: text("assigned_regions").array(),
+  // RBAC: Custom permission overrides
+  permissionsOverride: text("permissions_override").array(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull(),
 });
 
@@ -57,6 +61,25 @@ export const adminLogs = pgTable("admin_logs", {
   userId: text("user_id").references(() => municipalities.id, { onDelete: "set null" }),
   userName: text("user_name"),
   details: text("details"),
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull(),
+});
+
+/**
+ * RBAC Audit Logs - Track permission denials and role changes
+ */
+export const roleAuditLogs = pgTable("role_audit_logs", {
+  id: text("id").primaryKey(),
+  action: text("action").notNull(), // permission_denied, permission_granted, role_changed, etc.
+  userId: text("user_id").references(() => municipalities.id, { onDelete: "set null" }),
+  userName: text("user_name"),
+  userRole: text("user_role"),
+  oldRole: text("old_role"), // For role changes
+  newRole: text("new_role"), // For role changes
+  performedById: text("performed_by_id").references(() => municipalities.id, { onDelete: "set null" }),
+  performedByName: text("performed_by_name"),
+  details: text("details"), // JSON string with additional context
   ipAddress: text("ip_address"),
   userAgent: text("user_agent"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull(),

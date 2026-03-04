@@ -4,6 +4,10 @@ import { rateLimit } from "@/lib/rate-limit";
 import { validateOrigin } from "@/lib/csrf";
 import { createLog } from "@/lib/logging";
 
+/**
+ * POST /api/admin/auth
+ * Login endpoint (no RBAC - this IS the auth)
+ */
 export async function POST(request: NextRequest) {
   const csrf = validateOrigin(request);
   if (csrf) return csrf;
@@ -66,9 +70,14 @@ export async function POST(request: NextRequest) {
     id: municipality.id,
     name: municipality.name,
     region: municipality.region,
+    role: municipality.role,
   });
 }
 
+/**
+ * DELETE /api/admin/auth
+ * Logout endpoint (no RBAC required - just clears session)
+ */
 export async function DELETE(request: NextRequest) {
   // Get current session before clearing it
   const session = await getSession();
