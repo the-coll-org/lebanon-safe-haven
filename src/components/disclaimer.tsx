@@ -5,10 +5,10 @@ export function Disclaimer() {
   const t = useTranslations("common");
 
   return (
-    <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-3 dark:border-yellow-900 dark:bg-yellow-950">
+    <div className="border border-destructive/30 bg-destructive/5 p-3 rounded-sm">
       <div className="flex items-start gap-2">
-        <TriangleAlert className="h-4 w-4 text-yellow-600 dark:text-yellow-500 mt-0.5 shrink-0" />
-        <p className="text-sm text-yellow-800 dark:text-yellow-200">
+        <TriangleAlert className="h-4 w-4 text-destructive mt-0.5 shrink-0" />
+        <p className="text-sm text-destructive/90">
           {t("disclaimer")}
         </p>
       </div>
