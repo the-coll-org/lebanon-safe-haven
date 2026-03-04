@@ -101,7 +101,7 @@ export const REGION_CENTERS: Record<Region, [number, number]> = {
 export const LEBANON_CENTER: [number, number] = [33.8547, 35.8623];
 export const LEBANON_DEFAULT_ZOOM = 9;
 
-export const LISTING_STATUSES = ["available", "limited", "full"] as const;
+export const LISTING_STATUSES = ["available", "limited", "full", "unavailable"] as const;
 
 export const LISTING_CATEGORIES: ListingCategory[] = [
   "shelter",

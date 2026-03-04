@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { getLocalizedName } from "@/lib/lebanon-divisions";
 import { ListingCard } from "@/components/listing-card";
 import { RegionFilter } from "@/components/region-filter";
 import { CategoryFilter } from "@/components/category-filter";
@@ -16,7 +17,9 @@ interface ListingsClientProps {
 export function ListingsClient({ initialListings }: ListingsClientProps) {
   const t = useTranslations("listings");
   const tr = useTranslations("regions");
-  
+  const td = useTranslations("districts");
+  const locale = useLocale();
+
   const [region, setRegion] = useState("all");
   const [category, setCategory] = useState("all");
   const [search, setSearch] = useState("");
@@ -41,13 +44,15 @@ export function ListingsClient({ initialListings }: ListingsClientProps) {
       result = result.filter(
         (l) =>
           tr(l.region!).toLowerCase().includes(searchLower) ||
+          (l.district && td(l.district).toLowerCase().includes(searchLower)) ||
+          (l.village && getLocalizedName(l.village, locale as "ar" | "en").toLowerCase().includes(searchLower)) ||
           (l.area && l.area.toLowerCase().includes(searchLower)) ||
           (l.description && l.description.toLowerCase().includes(searchLower))
       );
     }
 
     return result;
-  }, [initialListings, region, category, search, tr]);
+  }, [initialListings, region, category, search, tr, td, locale]);
 
   return (
     <>

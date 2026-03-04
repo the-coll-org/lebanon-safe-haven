@@ -45,7 +45,7 @@ export default async function RootLayout({
   return (
     <html lang={locale} dir={dir} suppressHydrationWarning>
       <body
-        className={`${leagueSpartan.variable} ${montserrat.variable} ${notoArabic.variable} antialiased min-h-screen flex flex-col`}
+        className={`${leagueSpartan.variable} ${montserrat.variable} ${notoArabic.variable} antialiased min-h-screen flex flex-col overflow-x-hidden`}
         suppressHydrationWarning
       >
         {children}

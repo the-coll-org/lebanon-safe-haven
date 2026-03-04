@@ -6,9 +6,10 @@ import { getSession } from "@/lib/auth";
 import { validateOrigin } from "@/lib/csrf";
 import { createLog } from "@/lib/logging";
 import { REGION_LIST, LISTING_CATEGORIES, LISTING_STATUSES } from "@/lib/constants";
+import { ALL_DISTRICTS, DISTRICTS_BY_MOHAFAZA, ALL_VILLAGES, VILLAGES_BY_DISTRICT } from "@/lib/lebanon-divisions";
 import { encryptPhone } from "@/lib/crypto";
 
-const PHONE_REGEX = /^\+?[\d\s\-/]{7,20}$/;
+const PHONE_REGEX = /^\d{8}$/;
 
 export async function PATCH(
   request: NextRequest,
@@ -77,7 +78,7 @@ export async function PATCH(
   const updates: Record<string, unknown> = {};
 
   if (body.phone !== undefined) {
-    const cleanPhone = String(body.phone).trim();
+    const cleanPhone = String(body.phone).trim().replace(/\D/g, "");
     if (!PHONE_REGEX.test(cleanPhone)) {
       return NextResponse.json({ error: "Invalid phone number" }, { status: 400 });
     }
@@ -111,6 +112,35 @@ export async function PATCH(
       return NextResponse.json({ error: "Invalid capacity" }, { status: 400 });
     }
     updates.capacity = cap;
+  }
+
+  if (body.district !== undefined) {
+    if (body.district) {
+      const effectiveRegion = (updates.region as string) || listing.region;
+      if (ALL_DISTRICTS.includes(body.district)) {
+        const regionDistricts = DISTRICTS_BY_MOHAFAZA[effectiveRegion] || [];
+        if (regionDistricts.includes(body.district)) {
+          updates.district = body.district;
+        }
+      }
+    } else {
+      updates.district = null;
+      updates.village = null; // clear village when district is cleared
+    }
+  }
+
+  if (body.village !== undefined) {
+    if (body.village) {
+      const effectiveDistrict = (updates.district as string) || listing.district;
+      if (effectiveDistrict && ALL_VILLAGES.includes(body.village)) {
+        const districtVillages = VILLAGES_BY_DISTRICT[effectiveDistrict] || [];
+        if (districtVillages.includes(body.village)) {
+          updates.village = body.village;
+        }
+      }
+    } else {
+      updates.village = null;
+    }
   }
 
   if (body.area !== undefined) {

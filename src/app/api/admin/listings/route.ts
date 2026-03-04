@@ -7,11 +7,12 @@ import { validateOrigin } from "@/lib/csrf";
 import { encryptPhone } from "@/lib/crypto";
 import { createLog } from "@/lib/logging";
 import { REGION_LIST, LISTING_CATEGORIES, REGIONS } from "@/lib/constants";
+import { ALL_DISTRICTS, DISTRICTS_BY_MOHAFAZA, ALL_VILLAGES, VILLAGES_BY_DISTRICT } from "@/lib/lebanon-divisions";
 import { v4 as uuid } from "uuid";
 
 import type { Region } from "@/types";
 
-const PHONE_REGEX = /^\+?[\d\s\-/]{7,20}$/;
+const PHONE_REGEX = /^\d{8}$/;
 
 // Helper to normalize region names
 function normalizeRegion(input: string): string | null {
@@ -70,7 +71,7 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json();
-  const { phone, region, area, capacity, description, category, latitude, longitude } = body;
+  const { phone, region, district, village, area, capacity, description, category, latitude, longitude } = body;
 
   if (!phone || !region || !capacity) {
     return NextResponse.json(
@@ -87,7 +88,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const cleanPhone = String(phone).trim();
+  const cleanPhone = String(phone).trim().replace(/\D/g, "");
   if (!PHONE_REGEX.test(cleanPhone)) {
     return NextResponse.json(
       { error: "Invalid phone number format" },
@@ -138,10 +139,30 @@ export async function POST(request: NextRequest) {
   const editToken = uuid();
   const now = new Date();
 
+  // Validate district if provided
+  let validDistrict: string | null = null;
+  if (district && ALL_DISTRICTS.includes(district)) {
+    const regionDistricts = DISTRICTS_BY_MOHAFAZA[region] || [];
+    if (regionDistricts.includes(district)) {
+      validDistrict = district;
+    }
+  }
+
+  // Validate village if provided
+  let validVillage: string | null = null;
+  if (village && validDistrict && ALL_VILLAGES.includes(village)) {
+    const districtVillages = VILLAGES_BY_DISTRICT[validDistrict] || [];
+    if (districtVillages.includes(village)) {
+      validVillage = village;
+    }
+  }
+
   const listing = {
     id,
     phone: encryptPhone(cleanPhone),
     region,
+    district: validDistrict,
+    village: validVillage,
     category: cat,
     area: area ? String(area).slice(0, 200).trim() : null,
     capacity: cap,
@@ -259,11 +280,13 @@ export async function PATCH(request: NextRequest) {
 
     for (const row of jsonData) {
       try {
-        const phone = String(row.phone || "").trim();
+        const phone = String(row.phone || "").trim().replace(/\D/g, "");
         const regionInput = String(row.region || "").trim();
         const region = normalizeRegion(regionInput);
         const category = String(row.category || "shelter").trim();
         const capacity = Number(row.capacity || 0);
+        const csvDistrict = String(row.district || "").trim() || null;
+        const csvVillage = String(row.village || "").trim() || null;
         const area = String(row.area || "").trim() || null;
         const description = String(row.description || "").trim() || null;
         const latitude = row.latitude ? Number(row.latitude) : null;
@@ -331,10 +354,28 @@ export async function PATCH(request: NextRequest) {
         const editToken = uuid();
         const now = new Date();
 
+        // Validate district + village for CSV rows
+        let rowDistrict: string | null = null;
+        if (csvDistrict && ALL_DISTRICTS.includes(csvDistrict)) {
+          const regionDistricts = DISTRICTS_BY_MOHAFAZA[region] || [];
+          if (regionDistricts.includes(csvDistrict)) {
+            rowDistrict = csvDistrict;
+          }
+        }
+        let rowVillage: string | null = null;
+        if (csvVillage && rowDistrict && ALL_VILLAGES.includes(csvVillage)) {
+          const districtVillages = VILLAGES_BY_DISTRICT[rowDistrict] || [];
+          if (districtVillages.includes(csvVillage)) {
+            rowVillage = csvVillage;
+          }
+        }
+
         const listing = {
           id,
           phone: encryptPhone(phone),
           region,
+          district: rowDistrict,
+          village: rowVillage,
           category: validCategory,
           area: area ? area.slice(0, 200) : null,
           capacity,
