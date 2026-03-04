@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -22,15 +23,18 @@ import {
 } from "@/components/ui/select";
 import { UserPlus, Copy, Check, Users } from "lucide-react";
 import { REGION_LIST } from "@/lib/constants";
-import type { Region } from "@/types";
+import type { Region, Role } from "@/types";
 
 interface CreatedUser {
   username: string;
   password: string;
   name: string;
   region: string;
-  role: string;
+  role: Role;
+  assignedRegions?: string[];
 }
+
+const ROLES: Role[] = ["superadmin", "regional_admin", "municipality", "moderator", "viewer"];
 
 export function CreateUserDialog() {
   const t = useTranslations("admin");
@@ -44,7 +48,8 @@ export function CreateUserDialog() {
   const [username, setUsername] = useState("");
   const [name, setName] = useState("");
   const [region, setRegion] = useState<Region>(REGION_LIST[0]);
-  const [role, setRole] = useState<"municipality" | "superadmin">("municipality");
+  const [role, setRole] = useState<Role>("municipality");
+  const [assignedRegions, setAssignedRegions] = useState<string[]>([]);
 
   // Success state
   const [createdUser, setCreatedUser] = useState<CreatedUser | null>(null);
@@ -56,28 +61,50 @@ export function CreateUserDialog() {
     setName("");
     setRegion(REGION_LIST[0]);
     setRole("municipality");
+    setAssignedRegions([]);
     setError("");
     setCreatedUser(null);
     setCopiedPassword(false);
     setCopiedUsername(false);
   }
 
+  function toggleAssignedRegion(regionValue: string) {
+    setAssignedRegions((prev) =>
+      prev.includes(regionValue)
+        ? prev.filter((r) => r !== regionValue)
+        : [...prev, regionValue]
+    );
+  }
+
   async function handleCreate() {
     if (!username || !name) return;
+
+    // Validate assigned regions for regional_admin
+    if (role === "regional_admin" && assignedRegions.length === 0) {
+      setError("Regional admins must have at least one assigned region");
+      return;
+    }
 
     setLoading(true);
     setError("");
 
     try {
+      const body: Record<string, unknown> = {
+        username: username.trim(),
+        name: name.trim(),
+        region,
+        role,
+      };
+
+      // Only include assignedRegions for regional_admin
+      if (role === "regional_admin") {
+        body.assignedRegions = assignedRegions;
+      }
+
       const res = await fetch("/api/admin/users", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username: username.trim(),
-          name: name.trim(),
-          region,
-          role,
-        }),
+        body: JSON.stringify(body),
       });
 
       const data = await res.json();
@@ -89,6 +116,7 @@ export function CreateUserDialog() {
           name: name.trim(),
           region,
           role,
+          assignedRegions: role === "regional_admin" ? assignedRegions : undefined,
         });
       } else {
         setError(data.error || t("createUserError"));
@@ -116,6 +144,23 @@ export function CreateUserDialog() {
     resetForm();
   }
 
+  function getRoleLabel(roleValue: Role): string {
+    switch (roleValue) {
+      case "superadmin":
+        return t("roleSuperadmin");
+      case "regional_admin":
+        return t("roleRegionalAdmin");
+      case "municipality":
+        return t("roleMunicipality");
+      case "moderator":
+        return t("roleModerator");
+      case "viewer":
+        return t("roleViewer");
+      default:
+        return roleValue;
+    }
+  }
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -124,7 +169,7 @@ export function CreateUserDialog() {
           {t("createUser")}
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{t("createUserTitle")}</DialogTitle>
         </DialogHeader>
@@ -146,9 +191,7 @@ export function CreateUserDialog() {
                 placeholder={t("usernamePlaceholder")}
                 required
               />
-              <p className="text-xs text-muted-foreground">
-                {t("usernameHint")}
-              </p>
+              <p className="text-xs text-muted-foreground">{t("usernameHint")}</p>
             </div>
 
             <div className="space-y-1">
@@ -171,24 +214,54 @@ export function CreateUserDialog() {
                   </SelectTrigger>
                   <SelectContent>
                     {REGION_LIST.map((r) => (
-                      <SelectItem key={r} value={r}>{tr(r)}</SelectItem>
+                      <SelectItem key={r} value={r}>
+                        {tr(r)}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-1">
                 <Label className="text-xs">{t("role")} *</Label>
-                <Select value={role} onValueChange={(v) => setRole(v as "municipality" | "superadmin")}>
+                <Select value={role} onValueChange={(v) => setRole(v as Role)}>
                   <SelectTrigger className="h-8 text-sm">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="municipality">{t("roleMunicipality")}</SelectItem>
-                    <SelectItem value="superadmin">{t("roleSuperadmin")}</SelectItem>
+                    {ROLES.map((r) => (
+                      <SelectItem key={r} value={r}>
+                        {getRoleLabel(r)}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
             </div>
+
+            {/* Assigned Regions - only show for regional_admin */}
+            {role === "regional_admin" && (
+              <div className="space-y-2 p-3 bg-muted rounded-md">
+                <Label className="text-xs font-medium">{t("assignedRegions")} *</Label>
+                <p className="text-xs text-muted-foreground">{t("assignedRegionsHint")}</p>
+                <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto">
+                  {REGION_LIST.map((r) => (
+                    <div key={r} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`region-${r}`}
+                        checked={assignedRegions.includes(r)}
+                        onCheckedChange={() => toggleAssignedRegion(r)}
+                      />
+                      <label
+                        htmlFor={`region-${r}`}
+                        className="text-xs cursor-pointer"
+                      >
+                        {tr(r)}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <Button
               onClick={handleCreate}
@@ -249,6 +322,15 @@ export function CreateUserDialog() {
                       )}
                     </Button>
                   </div>
+
+                  {createdUser.assignedRegions && createdUser.assignedRegions.length > 0 && (
+                    <div className="p-2 bg-muted rounded">
+                      <div className="text-xs text-muted-foreground">{t("assignedRegions")}</div>
+                      <div className="text-sm">
+                        {createdUser.assignedRegions.map((r) => tr(r)).join(", ")}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
