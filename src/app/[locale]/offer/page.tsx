@@ -12,7 +12,7 @@ export default async function OfferPage({
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-lg">
-      <h1 className="text-2xl font-bold mb-2">{t("title")}</h1>
+      <h1 className="text-2xl font-extrabold uppercase tracking-wide mb-2 text-secondary">{t("title")}</h1>
       <p className="text-muted-foreground mb-6">{t("subtitle")}</p>
       <OfferForm />
     </div>
