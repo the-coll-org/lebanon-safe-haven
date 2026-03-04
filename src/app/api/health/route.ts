@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/db';
 import { sql } from 'drizzle-orm';
+import { cachedJsonResponse, CACHE_DURATIONS } from '@/lib/cache';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,7 +14,7 @@ export async function GET() {
       throw new Error('Database health check failed');
     }
 
-    return NextResponse.json({
+    const healthData = {
       status: 'healthy',
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
@@ -21,14 +22,22 @@ export async function GET() {
       checks: {
         database: 'ok'
       }
-    }, { status: 200 });
+    };
+
+    return cachedJsonResponse(healthData, CACHE_DURATIONS.HEALTH, { private: true });
   } catch (error) {
     console.error('Health check failed:', error);
     
+    // Don't cache error responses
     return NextResponse.json({
       status: 'unhealthy',
       timestamp: new Date().toISOString(),
       error: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 503 });
+    }, { 
+      status: 503,
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate'
+      }
+    });
   }
 }

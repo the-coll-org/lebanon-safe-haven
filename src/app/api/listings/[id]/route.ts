@@ -4,9 +4,11 @@ import { listings } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { validateOrigin } from "@/lib/csrf";
 import { decryptPhone } from "@/lib/crypto";
+import { handleConditionalRequest, CACHE_DURATIONS } from "@/lib/cache";
+import { revalidateListing } from "@/lib/revalidate";
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
@@ -19,7 +21,15 @@ export async function GET(
 
   // Decrypt phone, strip editToken from public response
   const { editToken, ...safe } = listing; // eslint-disable-line @typescript-eslint/no-unused-vars
-  return NextResponse.json({ ...safe, phone: decryptPhone(listing.phone) });
+  const responseData = { ...safe, phone: decryptPhone(listing.phone) };
+
+  // Cache individual listing for 1 minute with stale-while-revalidate
+  return handleConditionalRequest(
+    request,
+    responseData,
+    CACHE_DURATIONS.LISTINGS,
+    { staleWhileRevalidate: 600 } // Allow stale data for 10 minutes while revalidating
+  );
 }
 
 export async function PATCH(
@@ -85,6 +95,9 @@ export async function PATCH(
 
   await db.update(listings).set(updates).where(eq(listings.id, id));
 
+  // Revalidate caches
+  await revalidateListing(id);
+
   return NextResponse.json({ success: true });
 }
 
@@ -115,6 +128,9 @@ export async function DELETE(
   }
 
   await db.delete(listings).where(eq(listings.id, id));
+
+  // Revalidate caches
+  await revalidateListing(id);
 
   return NextResponse.json({ success: true });
 }
