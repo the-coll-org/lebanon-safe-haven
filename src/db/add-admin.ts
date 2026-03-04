@@ -11,6 +11,16 @@
  * A secure random password will be generated and printed.
  */
 
+import { readFileSync } from "fs";
+try {
+  readFileSync(".env", "utf8").split("\n").forEach((line) => {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("#")) return;
+    const idx = trimmed.indexOf("=");
+    if (idx > 0) process.env[trimmed.slice(0, idx).trim()] ??= trimmed.slice(idx + 1).trim();
+  });
+} catch {}
+
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import { municipalities } from "./schema";
@@ -28,7 +38,7 @@ if (args.length < 3) {
 
 const [username, name, region] = args;
 
-const connectionString = process.env.DATABASE_URL || "postgres://safehaven:safehaven@localhost:5432/safehaven";
+const connectionString = process.env.DATABASE_URL || `postgres://safehaven:safehaven@localhost:${process.env.DB_PORT || 5432}/safehaven`;
 const pool = new Pool({ connectionString });
 const db = drizzle(pool);
 
