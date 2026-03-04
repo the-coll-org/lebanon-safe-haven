@@ -31,9 +31,7 @@ export interface Listing {
   updatedAt: string;
 }
 
-export type AdminRole = "superadmin" | "regional_admin" | "municipality" | "moderator" | "viewer";
-
-export type Role = "superadmin" | "regional_admin" | "municipality" | "moderator" | "viewer";
+export type AdminRole = "superadmin" | "municipality";
 
 export interface Municipality {
   id: string;
