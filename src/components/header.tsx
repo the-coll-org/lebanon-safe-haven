@@ -11,7 +11,7 @@ import {
   SheetTrigger,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { Menu, Heart } from "lucide-react";
+import { Menu, Shield } from "lucide-react";
 import { useState } from "react";
 
 export function Header() {
@@ -31,20 +31,26 @@ export function Header() {
   ];
 
   return (
-    <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 bg-secondary text-secondary-foreground border-b border-secondary/80">
       <div className="container mx-auto flex h-14 items-center justify-between px-4">
         <Link
           href="/"
-          className="flex items-center gap-2 font-bold text-lg"
+          className="flex items-center gap-2 font-bold text-base tracking-widest uppercase text-white"
         >
-          <Heart className="h-5 w-5 text-primary fill-primary" />
+          <Shield className="h-5 w-5 text-primary shrink-0" />
           <span>{tc("appName")}</span>
         </Link>
 
         {/* Desktop nav */}
-        <nav className="hidden md:flex items-center gap-1">
+        <nav className="hidden md:flex items-center gap-0.5">
           {navLinks.map((link) => (
-            <Button key={link.href} variant="ghost" size="sm" asChild>
+            <Button
+              key={link.href}
+              variant="ghost"
+              size="sm"
+              className="text-white/80 hover:text-primary hover:bg-white/10 text-xs tracking-wide uppercase font-medium rounded-none"
+              asChild
+            >
               <Link href={link.href}>{link.label}</Link>
             </Button>
           ))}
@@ -58,20 +64,27 @@ export function Header() {
           <LanguageSwitcher />
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-white hover:bg-white/10"
+              >
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side={locale === "ar" ? "right" : "left"}>
-              <SheetTitle className="text-start mt-4 mb-4 px-4">
+            <SheetContent
+              side={locale === "ar" ? "right" : "left"}
+              className="bg-secondary text-white border-secondary/80"
+            >
+              <SheetTitle className="text-start mt-4 mb-6 px-4 text-white uppercase tracking-widest text-sm font-bold">
                 {tc("appName")}
               </SheetTitle>
-              <nav className="flex flex-col gap-2">
+              <nav className="flex flex-col gap-1">
                 {navLinks.map((link) => (
                   <Button
                     key={link.href}
                     variant="ghost"
-                    className="justify-start"
+                    className="justify-start text-white/80 hover:text-primary hover:bg-white/10 uppercase text-xs tracking-wide font-medium rounded-none"
                     asChild
                     onClick={() => setOpen(false)}
                   >

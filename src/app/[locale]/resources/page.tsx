@@ -33,17 +33,22 @@ export default async function ResourcesPage({
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">
-      <h1 className="text-2xl font-bold mb-2">{t("title")}</h1>
+      <h1 className="text-2xl font-extrabold uppercase tracking-wide mb-2 text-secondary">{t("title")}</h1>
       <p className="text-muted-foreground mb-6">{t("subtitle")}</p>
 
       <div className="grid gap-4">
         {RESOURCES.map((resource) => (
-          <Card key={resource.key}>
+          <Card key={resource.key} className="rounded-sm border-border">
             <CardContent className="p-4 flex items-center justify-between">
-              <h3 className="font-medium">
+              <h3 className="font-bold text-sm uppercase tracking-wide text-secondary">
                 {t(resource.key as "unhcr" | "redCross" | "unicef" | "caritas")}
               </h3>
-              <Button variant="outline" size="sm" className="gap-1.5" asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5 rounded-sm border-primary/40 text-primary hover:bg-primary/5 hover:border-primary text-xs font-semibold"
+                asChild
+              >
                 <a
                   href={resource.url}
                   target="_blank"

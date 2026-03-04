@@ -51,13 +51,13 @@ export function ListingCard({ listing }: ListingCardProps) {
     : t("items");
 
   return (
-    <Link href={`/listings/${listing.id}`} className="block">
-      <Card className="hover:shadow-md transition-shadow">
+    <Link href={`/listings/${listing.id}`} className="block group">
+      <Card className="rounded-sm border-border hover:border-primary transition-colors duration-150">
         <CardContent className="p-3">
           {/* Row 1: Location + category + status */}
           <div className="flex items-center justify-between gap-1.5 mb-1.5">
             <div className="flex items-center gap-1.5 min-w-0 flex-wrap">
-              <span className="flex items-center gap-1 text-sm font-medium">
+              <span className="flex items-center gap-1 text-sm font-semibold text-secondary uppercase tracking-wide">
                 <MapPin className="h-3.5 w-3.5 shrink-0" />
                 {tr(listing.region)}
               </span>
@@ -68,14 +68,17 @@ export function ListingCard({ listing }: ListingCardProps) {
               )}
             </div>
             <div className="flex items-center gap-1 shrink-0">
-              <Badge variant="outline" className="gap-0.5 text-[11px] px-1.5 py-0">
+              <Badge
+                variant="outline"
+                className="gap-0.5 text-[11px] px-1.5 py-0 rounded-sm border-border"
+              >
                 <CategoryIcon className="h-3 w-3" />
                 {tcat(listing.category)}
               </Badge>
               {listing.verified && (
                 <>
-                  <BadgeCheck className="h-4 w-4 fill-blue-600 text-white shrink-0 sm:hidden" />
-                  <Badge className="hidden sm:inline-flex gap-1 bg-blue-600 hover:bg-blue-700 text-[11px] px-1.5 py-0">
+                  <BadgeCheck className="h-4 w-4 fill-secondary text-white shrink-0 sm:hidden" />
+                  <Badge className="hidden sm:inline-flex gap-1 bg-secondary hover:bg-secondary/90 text-[11px] px-1.5 py-0 rounded-sm">
                     <BadgeCheck className="h-3 w-3" />
                     {tc("verified")}
                   </Badge>
@@ -83,7 +86,7 @@ export function ListingCard({ listing }: ListingCardProps) {
               )}
               <Badge
                 variant={statusVariant[listing.status] || "default"}
-                className="text-[11px] px-1.5 py-0"
+                className="text-[11px] px-1.5 py-0 rounded-sm"
               >
                 {t(listing.status as "available" | "limited" | "full")}
               </Badge>
@@ -102,7 +105,7 @@ export function ListingCard({ listing }: ListingCardProps) {
           </div>
 
           {/* Row 3: Contact CTA */}
-          <div className="flex items-center gap-1 text-xs text-primary">
+          <div className="flex items-center gap-1 text-xs text-primary font-semibold">
             <Phone className="h-3 w-3" />
             <span>{tc("viewContact")}</span>
           </div>

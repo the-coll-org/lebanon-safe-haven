@@ -31,10 +31,10 @@ export default function OfferSuccessPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-lg">
-      <Card>
+      <Card className="rounded-sm border-border">
         <CardContent className="p-6 text-center space-y-4">
-          <CheckCircle className="h-16 w-16 text-green-600 mx-auto" />
-          <h1 className="text-2xl font-bold">{t("title")}</h1>
+          <CheckCircle className="h-16 w-16 text-primary mx-auto" />
+          <h1 className="text-2xl font-extrabold uppercase tracking-wide text-secondary">{t("title")}</h1>
           <p className="text-muted-foreground">{t("subtitle")}</p>
 
           <div className="text-start space-y-2">
@@ -49,12 +49,12 @@ export default function OfferSuccessPage() {
           </div>
 
           <div className="flex flex-col gap-2 pt-2">
-            <Button asChild>
+            <Button className="rounded-sm font-bold uppercase tracking-wide" asChild>
               <Link href={`/listings/${id}`}>
                 {t("viewListing")}
               </Link>
             </Button>
-            <Button variant="ghost" asChild>
+            <Button variant="ghost" className="text-muted-foreground hover:text-foreground" asChild>
               <Link href="/">{t("backHome")}</Link>
             </Button>
           </div>

@@ -14,7 +14,7 @@ export default async function HotlinesPage({
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">
-      <h1 className="text-2xl font-bold mb-2">{t("title")}</h1>
+      <h1 className="text-2xl font-extrabold uppercase tracking-wide mb-2 text-secondary">{t("title")}</h1>
       <p className="text-muted-foreground mb-6">{t("subtitle")}</p>
 
       <div className="grid gap-4 sm:grid-cols-2">

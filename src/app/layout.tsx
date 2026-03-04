@@ -1,12 +1,13 @@
 import type { ReactNode } from "react";
 import type { Metadata } from "next";
 import { getLocale } from "next-intl/server";
-import { Geist, Noto_Sans_Arabic } from "next/font/google";
+import { Inter, Noto_Sans_Arabic } from "next/font/google";
 import "./globals.css";
 
-const geist = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
 });
 
 const notoArabic = Noto_Sans_Arabic({
@@ -32,7 +33,7 @@ export default async function RootLayout({
   return (
     <html lang={locale} dir={dir} suppressHydrationWarning>
       <body
-        className={`${geist.variable} ${notoArabic.variable} antialiased min-h-screen flex flex-col`}
+        className={`${inter.variable} ${notoArabic.variable} antialiased min-h-screen flex flex-col`}
       >
         {children}
       </body>
