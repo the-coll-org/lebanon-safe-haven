@@ -4,6 +4,8 @@ export const listings = pgTable("listings", {
   id: text("id").primaryKey(),
   phone: text("phone").notNull(),
   region: text("region").notNull(),
+  district: text("district"),
+  village: text("village"),
   category: text("category").notNull().default("shelter"),
   area: text("area"),
   capacity: integer("capacity").notNull(),
@@ -13,6 +15,7 @@ export const listings = pgTable("listings", {
   verified: boolean("verified").notNull().default(false),
   verifiedBy: text("verified_by"),
   flagCount: integer("flag_count").notNull().default(0),
+  unavailableCount: integer("unavailable_count").notNull().default(0),
   latitude: real("latitude"),
   longitude: real("longitude"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull(),
@@ -46,6 +49,15 @@ export const feedback = pgTable("feedback", {
   category: text("category").notNull().default("general"),
   userType: text("user_type").notNull().default("guest"),
   municipalityId: text("municipality_id").references(() => municipalities.id, { onDelete: "set null" }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull(),
+});
+
+export const unavailableReports = pgTable("unavailable_reports", {
+  id: text("id").primaryKey(),
+  listingId: text("listing_id")
+    .notNull()
+    .references(() => listings.id, { onDelete: "cascade" }),
+  ipHash: text("ip_hash").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull(),
 });
 

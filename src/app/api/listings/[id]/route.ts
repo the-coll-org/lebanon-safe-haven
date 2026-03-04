@@ -3,7 +3,7 @@ import { db } from "@/db";
 import { listings } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { validateOrigin } from "@/lib/csrf";
-import { decryptPhone } from "@/lib/crypto";
+import { decryptPhone, encryptPhone } from "@/lib/crypto";
 import { handleConditionalRequest, CACHE_DURATIONS } from "@/lib/cache";
 import { revalidateListing } from "@/lib/revalidate";
 
@@ -41,7 +41,7 @@ export async function PATCH(
 
   const { id } = await params;
   const body = await request.json();
-  const { editToken, status, description, capacity, latitude, longitude } = body;
+  const { editToken, status, description, capacity, phone, latitude, longitude, resetUnavailable } = body;
 
   if (!editToken) {
     return NextResponse.json(
@@ -61,11 +61,19 @@ export async function PATCH(
     return NextResponse.json({ error: "Invalid edit token" }, { status: 403 });
   }
 
-  const validStatuses = ["available", "limited", "full"];
+  const PHONE_REGEX = /^\d{8}$/;
+  const validStatuses = ["available", "limited", "full", "unavailable"];
   const updates: Record<string, unknown> = {
     updatedAt: new Date(),
   };
   if (status && validStatuses.includes(status)) updates.status = status;
+  if (phone !== undefined) {
+    const cleanPhone = String(phone).trim().replace(/\D/g, "");
+    if (PHONE_REGEX.test(cleanPhone)) {
+      updates.phone = encryptPhone(cleanPhone);
+    }
+  }
+  if (resetUnavailable) updates.unavailableCount = 0;
   if (description !== undefined)
     updates.description = description
       ? String(description).slice(0, 1000).trim()

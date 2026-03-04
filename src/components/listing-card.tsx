@@ -1,7 +1,7 @@
 "use client";
 
 import { Link } from "@/i18n/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -14,6 +14,7 @@ import {
   Shirt,
   Phone,
 } from "lucide-react";
+import { getLocalizedName } from "@/lib/lebanon-divisions";
 import type { Listing } from "@/types";
 
 interface ListingCardProps {
@@ -24,6 +25,7 @@ const statusVariant: Record<string, "default" | "secondary" | "destructive"> = {
   available: "default",
   limited: "secondary",
   full: "destructive",
+  unavailable: "destructive",
 };
 
 const categoryIcons: Record<string, typeof Home> = {
@@ -37,7 +39,9 @@ export function ListingCard({ listing }: ListingCardProps) {
   const t = useTranslations("listings");
   const tc = useTranslations("common");
   const tr = useTranslations("regions");
+  const td = useTranslations("districts");
   const tcat = useTranslations("categories");
+  const locale = useLocale();
 
   const CategoryIcon = categoryIcons[listing.category] || Home;
 
@@ -60,6 +64,16 @@ export function ListingCard({ listing }: ListingCardProps) {
               <span className="flex items-center gap-1 text-sm font-semibold text-secondary uppercase tracking-wide">
                 <MapPin className="h-3.5 w-3.5 shrink-0" />
                 {tr(listing.region)}
+                {listing.district && (
+                  <span className="text-xs font-normal normal-case tracking-normal text-muted-foreground">
+                    — {td(listing.district)}
+                  </span>
+                )}
+                {listing.village && (
+                  <span className="text-xs font-normal normal-case tracking-normal text-muted-foreground">
+                    — {getLocalizedName(listing.village, locale as "ar" | "en")}
+                  </span>
+                )}
               </span>
               {listing.area && (
                 <span className="text-xs text-muted-foreground truncate">
@@ -88,7 +102,7 @@ export function ListingCard({ listing }: ListingCardProps) {
                 variant={statusVariant[listing.status] || "default"}
                 className="text-[11px] px-1.5 py-0 rounded-sm"
               >
-                {t(listing.status as "available" | "limited" | "full")}
+                {t(listing.status as "available" | "limited" | "full" | "unavailable")}
               </Badge>
             </div>
           </div>

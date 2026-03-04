@@ -50,7 +50,7 @@ export function FlagButton({
           className="gap-1 text-muted-foreground"
         >
           <Flag className="h-3.5 w-3.5" />
-          <span className="hidden sm:inline">{tc("flag")}</span>
+          {tc("flag")}
         </Button>
       </DialogTrigger>
       <DialogContent>

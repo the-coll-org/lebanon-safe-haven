@@ -8,7 +8,7 @@ export type Region =
   | "akkar"
   | "north_lebanon";
 
-export type ListingStatus = "available" | "limited" | "full";
+export type ListingStatus = "available" | "limited" | "full" | "unavailable";
 
 export type ListingCategory = "shelter" | "food" | "appliances" | "clothing";
 
@@ -16,6 +16,8 @@ export interface Listing {
   id: string;
   phone: string;
   region: Region;
+  district: string | null;
+  village: string | null;
   category: ListingCategory;
   area: string | null;
   capacity: number;
@@ -25,6 +27,7 @@ export interface Listing {
   verified: boolean;
   verifiedBy: string | null;
   flagCount: number;
+  unavailableCount: number;
   latitude: number | null;
   longitude: number | null;
   createdAt: string;

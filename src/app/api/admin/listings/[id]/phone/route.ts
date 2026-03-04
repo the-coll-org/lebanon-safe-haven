@@ -6,7 +6,7 @@ import { getSession } from "@/lib/auth";
 import { validateOrigin } from "@/lib/csrf";
 import { encryptPhone } from "@/lib/crypto";
 
-const PHONE_REGEX = /^\+?[\d\s\-/]{7,20}$/;
+const PHONE_REGEX = /^\d{8}$/;
 
 export async function PATCH(
   request: NextRequest,
@@ -28,7 +28,7 @@ export async function PATCH(
     return NextResponse.json({ error: "Phone is required" }, { status: 400 });
   }
 
-  const cleanPhone = String(phone).trim();
+  const cleanPhone = String(phone).trim().replace(/\D/g, "");
   if (!PHONE_REGEX.test(cleanPhone)) {
     return NextResponse.json(
       { error: "Invalid phone number format" },

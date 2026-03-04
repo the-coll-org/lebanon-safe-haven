@@ -4,6 +4,7 @@ import { listings } from "@/db/schema";
 import { desc, eq, and, lt } from "drizzle-orm";
 import { v4 as uuid } from "uuid";
 import { REGION_LIST, LISTING_CATEGORIES } from "@/lib/constants";
+import { ALL_DISTRICTS, DISTRICTS_BY_MOHAFAZA, ALL_VILLAGES, VILLAGES_BY_DISTRICT } from "@/lib/lebanon-divisions";
 import { rateLimit } from "@/lib/rate-limit";
 import { validateOrigin } from "@/lib/csrf";
 import { encryptPhone, decryptPhone } from "@/lib/crypto";
@@ -12,8 +13,8 @@ import { cachedJsonResponse, handleConditionalRequest, CACHE_DURATIONS } from "@
 import { revalidateListings } from "@/lib/revalidate";
 import type { Region, ListingCategory } from "@/types";
 
-// Phone: Lebanese numbers only — digits, spaces, dashes, slashes, optional leading +
-const PHONE_REGEX = /^\+?[\d\s\-/]{7,20}$/;
+// Phone: Lebanese numbers only — exactly 8 digits
+const PHONE_REGEX = /^\d{8}$/;
 
 // Auto-expire listings older than 30 days
 async function cleanupExpired() {
@@ -88,7 +89,7 @@ export async function POST(request: NextRequest) {
   if (limited) return limited;
 
   const body = await request.json();
-  const { phone, region, area, capacity, description, category, latitude, longitude } = body;
+  const { phone, region, district, village, area, capacity, description, category, latitude, longitude } = body;
 
   if (!phone || !region || !capacity) {
     return NextResponse.json(
@@ -148,10 +149,30 @@ export async function POST(request: NextRequest) {
   const editToken = uuid();
   const now = new Date();
 
+  // Validate district if provided (must belong to selected region)
+  let validDistrict: string | null = null;
+  if (district && ALL_DISTRICTS.includes(district)) {
+    const regionDistricts = DISTRICTS_BY_MOHAFAZA[region] || [];
+    if (regionDistricts.includes(district)) {
+      validDistrict = district;
+    }
+  }
+
+  // Validate village if provided (must belong to selected district)
+  let validVillage: string | null = null;
+  if (village && validDistrict && ALL_VILLAGES.includes(village)) {
+    const districtVillages = VILLAGES_BY_DISTRICT[validDistrict] || [];
+    if (districtVillages.includes(village)) {
+      validVillage = village;
+    }
+  }
+
   const listing = {
     id,
     phone: encryptPhone(cleanPhone),
     region,
+    district: validDistrict,
+    village: validVillage,
     category: cat,
     area: area ? String(area).slice(0, 200).trim() : null,
     capacity: cap,
@@ -161,6 +182,7 @@ export async function POST(request: NextRequest) {
     verified: false,
     verifiedBy: null,
     flagCount: 0,
+    unavailableCount: 0,
     latitude: validLat,
     longitude: validLng,
     createdAt: now,
