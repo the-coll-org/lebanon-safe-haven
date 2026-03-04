@@ -34,6 +34,7 @@ export default async function RootLayout({
     <html lang={locale} dir={dir} suppressHydrationWarning>
       <body
         className={`${inter.variable} ${notoArabic.variable} antialiased min-h-screen flex flex-col`}
+        suppressHydrationWarning
       >
         {children}
       </body>
