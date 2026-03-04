@@ -8,6 +8,8 @@ import { rateLimit } from "@/lib/rate-limit";
 import { validateOrigin } from "@/lib/csrf";
 import { encryptPhone, decryptPhone } from "@/lib/crypto";
 import { getSession } from "@/lib/auth";
+import { cachedJsonResponse, handleConditionalRequest, CACHE_DURATIONS } from "@/lib/cache";
+import { revalidateListings } from "@/lib/revalidate";
 import type { Region, ListingCategory } from "@/types";
 
 // Phone: Lebanese numbers only — digits, spaces, dashes, slashes, optional leading +
@@ -59,7 +61,18 @@ export async function GET(request: NextRequest) {
     return safe;
   });
 
-  return NextResponse.json(mapped);
+  // Cache public listing data for 30 seconds with stale-while-revalidate
+  if (!session) {
+    return handleConditionalRequest(
+      request,
+      mapped,
+      CACHE_DURATIONS.LISTINGS_FILTERED,
+      { staleWhileRevalidate: 300 } // Allow stale data for 5 minutes while revalidating
+    );
+  }
+
+  // Admin requests are private and cached for shorter duration
+  return cachedJsonResponse(mapped, CACHE_DURATIONS.ADMIN_DATA, { private: true });
 }
 
 export async function POST(request: NextRequest) {
@@ -155,6 +168,9 @@ export async function POST(request: NextRequest) {
   };
 
   await db.insert(listings).values(listing);
+
+  // Revalidate listings cache to include new listing
+  await revalidateListings();
 
   return NextResponse.json({ id, editToken }, { status: 201 });
 }

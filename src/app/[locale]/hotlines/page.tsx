@@ -3,6 +3,13 @@ import { HotlineCard } from "@/components/hotline-card";
 import { Disclaimer } from "@/components/disclaimer";
 import { GOVERNMENT_HOTLINES } from "@/lib/constants";
 
+// Static data - cache for 24 hours
+export const revalidate = 86400;
+
+export function generateStaticParams() {
+  return [{ locale: "ar" }, { locale: "en" }];
+}
+
 export default async function HotlinesPage({
   params,
 }: {
