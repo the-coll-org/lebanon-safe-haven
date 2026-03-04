@@ -1,3 +1,13 @@
+import { readFileSync } from "fs";
+try {
+  readFileSync(".env", "utf8").split("\n").forEach((line) => {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("#")) return;
+    const idx = trimmed.indexOf("=");
+    if (idx > 0) process.env[trimmed.slice(0, idx).trim()] ??= trimmed.slice(idx + 1).trim();
+  });
+} catch {}
+
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import { municipalities } from "./schema";
@@ -5,7 +15,7 @@ import bcrypt from "bcryptjs";
 import { v4 as uuid } from "uuid";
 import crypto from "crypto";
 
-const connectionString = process.env.DATABASE_URL || "postgres://safehaven:safehaven@localhost:5432/safehaven";
+const connectionString = process.env.DATABASE_URL || `postgres://safehaven:safehaven@localhost:${process.env.DB_PORT || 5432}/safehaven`;
 
 const pool = new Pool({ connectionString });
 const db = drizzle(pool);

@@ -13,7 +13,6 @@ import { AdminEditDialog } from "@/components/admin-edit-dialog";
 import { AdminCreateDialog } from "@/components/admin-create-dialog";
 import { ImportExportDialog } from "@/components/import-export-dialog";
 import { FeedbackDialog } from "@/components/feedback-dialog";
-import { CreateUserDialog } from "@/components/create-user-dialog";
 import { LogsDialog } from "@/components/logs-dialog";
 import {
   BadgeCheck,
@@ -364,7 +363,6 @@ export default function AdminDashboardPage() {
         />
         <ImportExportDialog onImportSuccess={refreshListings} />
         <FeedbackDialog />
-        {isSuperadmin && <CreateUserDialog />}
         {isSuperadmin && <LogsDialog />}
       </div>
 

@@ -2,7 +2,7 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import * as schema from "./schema";
 
-const connectionString = process.env.DATABASE_URL || "postgres://safehaven:safehaven@localhost:5432/safehaven";
+const connectionString = process.env.DATABASE_URL || `postgres://safehaven:safehaven@localhost:${process.env.DB_PORT || 5432}/safehaven`;
 
 const pool = new Pool({
   connectionString,
