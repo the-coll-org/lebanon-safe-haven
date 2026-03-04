@@ -1,9 +1,7 @@
 import { setRequestLocale } from "next-intl/server";
 import { getTranslations } from "next-intl/server";
 import { getListings } from "@/lib/data";
-import { CACHE_TAGS } from "@/lib/revalidate";
 import { ListingsClient } from "@/components/listings-client";
-import { unstable_cache } from "next/cache";
 
 // Revalidate the page every 60 seconds (ISR)
 export const revalidate = 60;
@@ -12,13 +10,6 @@ export const revalidate = 60;
 export function generateStaticParams() {
   return [{ locale: "ar" }, { locale: "en" }];
 }
-
-// Cached listings fetch with unstable_cache for persistent caching
-const getCachedListings = unstable_cache(
-  async () => getListings(),
-  ["listings-page"],
-  { tags: [CACHE_TAGS.LISTINGS] }
-);
 
 export default async function ListingsPage({
   params,
@@ -29,8 +20,7 @@ export default async function ListingsPage({
   setRequestLocale(locale);
   const t = await getTranslations("listings");
 
-  // Fetch listings with Data Cache (cached per-request) + unstable_cache (persistent)
-  const listings = await getCachedListings();
+  const listings = await getListings();
 
   return (
     <div className="container mx-auto px-4 py-6">
@@ -41,5 +31,4 @@ export default async function ListingsPage({
   );
 }
 
-// Tags for on-demand revalidation
 export const dynamicParams = true;
