@@ -1,20 +1,18 @@
 import { NextResponse } from "next/server";
-import { withAuth } from "@/lib/rbac/wrapper";
+import { getSession } from "@/lib/auth";
 
-/**
- * GET /api/admin/me
- * Get current user info
- */
-export const GET = withAuth(
-  {},
-  async (_request, { session }) => {
-    return NextResponse.json({
-      id: session.id,
-      name: session.name,
-      region: session.region,
-      role: session.role,
-      username: session.username,
-      assignedRegions: session.assignedRegions,
-    });
+export async function GET() {
+  const session = await getSession();
+
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-);
+
+  return NextResponse.json({
+    id: session.id,
+    name: session.name,
+    region: session.region,
+    role: session.role || "municipality",
+    username: session.username,
+  });
+}

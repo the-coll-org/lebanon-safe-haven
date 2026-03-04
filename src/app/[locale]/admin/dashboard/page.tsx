@@ -52,13 +52,11 @@ export default function AdminDashboardPage() {
   const [adminRegion, setAdminRegion] = useState<Region | null>(null);
   const [adminRole, setAdminRole] = useState<AdminRole>("municipality");
   const [adminName, setAdminName] = useState("");
-  const [assignedRegions, setAssignedRegions] = useState<string[]>([]);
   const [search, setSearch] = useState("");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false);
 
   const isSuperadmin = adminRole === "superadmin";
-  const isRegionalAdmin = adminRole === "regional_admin";
 
   async function fetchListings(region?: string) {
     setLoading(true);
@@ -162,7 +160,6 @@ export default function AdminDashboardPage() {
       setAdminRegion(data.region);
       setAdminRole(data.role || "municipality");
       setAdminName(data.name);
-      setAssignedRegions(data.assignedRegions || []);
       const region = data.role === "superadmin" ? undefined : data.region;
       const params = region ? `?region=${region}` : "";
       const listingsRes = await fetch(`/api/listings${params}`);
@@ -352,28 +349,11 @@ export default function AdminDashboardPage() {
         </Button>
       </div>
       {adminRegion && (
-        <div className="text-sm text-muted-foreground mb-6">
-          <div className="flex items-center gap-2">
-            <span className="font-medium text-foreground">{adminName}</span>
-            <Badge variant={isSuperadmin ? "destructive" : isRegionalAdmin ? "default" : "secondary"}>
-              {adminRole === "superadmin" 
-                ? (locale === "ar" ? "مدير عام" : "Super Admin")
-                : adminRole === "regional_admin"
-                ? (locale === "ar" ? "مسؤول إقليمي" : "Regional Admin")
-                : adminRole === "moderator"
-                ? (locale === "ar" ? "مشرف" : "Moderator")
-                : adminRole === "viewer"
-                ? (locale === "ar" ? "مشاهد" : "Viewer")
-                : tr(adminRegion)}
-            </Badge>
-          </div>
-          {isRegionalAdmin && assignedRegions.length > 0 && (
-            <p className="mt-1 text-xs">
-              {locale === "ar" ? "المناطق: " : "Regions: "}
-              {assignedRegions.map((r) => tr(r as Region)).join(", ")}
-            </p>
-          )}
-        </div>
+        <p className="text-sm text-muted-foreground mb-6">
+          {adminName} — {isSuperadmin
+            ? (locale === "ar" ? "مدير عام" : "Super Admin")
+            : tr(adminRegion)}
+        </p>
       )}
 
       {/* Create Listing & Import/Export Buttons */}
@@ -385,17 +365,6 @@ export default function AdminDashboardPage() {
         <ImportExportDialog onImportSuccess={refreshListings} />
         <FeedbackDialog />
         {isSuperadmin && <CreateUserDialog />}
-        {isSuperadmin && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => router.push("/admin/users")}
-            className="gap-1"
-          >
-            <Users className="h-4 w-4" />
-            {t("manageUsers")}
-          </Button>
-        )}
         {isSuperadmin && <LogsDialog />}
       </div>
 
