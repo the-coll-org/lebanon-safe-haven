@@ -43,7 +43,8 @@ export async function getSession(): Promise<SessionUser | null> {
       role: user.role,
       username: user.username,
     };
-  } catch {
+  } catch (error) {
+    console.error("[auth] getSession failed:", error);
     return null;
   }
 }
@@ -94,9 +95,9 @@ export async function syncUserWithDatabase(): Promise<SessionUser | null> {
       return { id: u.id, name, email: u.email, region: u.region, role: u.role, username: u.username };
     }
 
-    // Create new user
+    // Create new superadmin user
     const { v4: uuidv4 } = await import("uuid");
-    const username = `${primaryEmail.split("@")[0]}_${Math.random().toString(36).slice(2, 6)}`;
+    const username = primaryEmail.split("@")[0];
 
     const id = uuidv4();
     await db.insert(municipalities).values({
@@ -105,13 +106,14 @@ export async function syncUserWithDatabase(): Promise<SessionUser | null> {
       email: primaryEmail,
       username,
       region: "all",
-      role: "municipality",
+      role: "superadmin",
       clerkId: clerkUser.id,
       createdAt: new Date(),
     });
 
-    return { id, name, email: primaryEmail, region: "all", role: "municipality", username };
-  } catch {
+    return { id, name, email: primaryEmail, region: "all", role: "superadmin", username };
+  } catch (error) {
+    console.error("[auth] syncUserWithDatabase failed:", error);
     return null;
   }
 }
