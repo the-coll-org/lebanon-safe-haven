@@ -1,8 +1,8 @@
 #!/bin/bash
-# Safe Haven Deployment Test Script
+# The Haven Deployment Test Script
 
 echo "========================================="
-echo "Safe Haven Deployment Test"
+echo "The Haven Deployment Test"
 echo "Domain: safehaven.thecoll.org"
 echo "========================================="
 echo ""

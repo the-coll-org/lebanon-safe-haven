@@ -5,7 +5,7 @@ services:
     build:
       context: .
       tags:
-        - lebanon-safe-haven-app:latest
+        - the-haven-app:latest
     restart: unless-stopped
     ports:
       - "127.0.0.1:3000:3000"
@@ -26,7 +26,7 @@ services:
       start_period: 90s
     labels:
       - "auto-devops=true"
-      - "app=safe-haven"
+      - "app=the-haven"
 
   db:
     image: postgres:16-alpine
@@ -44,4 +44,4 @@ services:
       retries: 5
     labels:
       - "auto-devops=true"
-      - "app=safe-haven-db"
+      - "app=the-haven-db"

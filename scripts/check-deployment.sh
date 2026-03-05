@@ -36,7 +36,7 @@ if command -v docker &> /dev/null; then
     echo "🐳 Docker Status:"
     
     # Check if container is running
-    CONTAINER_ID=$(docker ps -q --filter "name=safe-haven" --filter "name=app" 2>/dev/null | head -1)
+    CONTAINER_ID=$(docker ps -q --filter "name=the-haven" --filter "name=app" 2>/dev/null | head -1)
     
     if [ -n "$CONTAINER_ID" ]; then
         CONTAINER_NAME=$(docker ps --format "{{.Names}}" --filter "id=$CONTAINER_ID")
@@ -65,7 +65,7 @@ if command -v docker &> /dev/null; then
         echo -e "   Status: ${RED}Not Running${NC}"
         
         # Check if container exists but is stopped
-        STOPPED=$(docker ps -aq --filter "name=safe-haven" --filter "name=app" 2>/dev/null | head -1)
+        STOPPED=$(docker ps -aq --filter "name=the-haven" --filter "name=app" 2>/dev/null | head -1)
         if [ -n "$STOPPED" ]; then
             echo "   Container exists but is stopped"
             echo "   Last exit code: $(docker inspect --format='{{.State.ExitCode}}' $STOPPED)"

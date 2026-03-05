@@ -1,20 +1,20 @@
 #!/bin/bash
 set -e
 
-# Auto DevOps Setup Script for Safe Haven
+# Auto DevOps Setup Script for The Haven
 # Run this on your production server to prepare for GitHub Actions deployments
 
-echo "🚀 Safe Haven Auto DevOps Setup"
+echo "🚀 The Haven Auto DevOps Setup"
 echo "================================"
 echo ""
 
 # Configuration
-APP_DIR="/opt/safe-haven"
+APP_DIR="/opt/the-haven"
 REPO_URL="${1:-}"  # Pass GitHub repo URL as first argument
 
 if [ -z "$REPO_URL" ]; then
     echo "Usage: $0 <github-repo-url>"
-    echo "Example: $0 https://github.com/username/safe-haven"
+    echo "Example: $0 https://github.com/username/the-haven"
     exit 1
 fi
 
@@ -69,7 +69,7 @@ EOF
 fi
 
 # Create deploy key for GitHub Actions
-DEPLOY_KEY_FILE="/root/.ssh/safehaven_deploy"
+DEPLOY_KEY_FILE="/root/.ssh/thehaven_deploy"
 if [ ! -f "$DEPLOY_KEY_FILE" ]; then
     echo "🔑 Creating SSH deploy key for GitHub Actions..."
     mkdir -p /root/.ssh

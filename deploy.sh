@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-echo "=== Safe Haven Deployment ==="
+echo "=== The Haven Deployment ==="
 echo "Domain: safehaven.thecoll.org"
 echo ""
 

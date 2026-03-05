@@ -114,7 +114,7 @@ jobs:
             echo "📦 Deploying commit: ${{ github.sha }}"
             
             # Navigate to app directory
-            cd /opt/safe-haven
+            cd /opt/the-haven
             
             # Pull latest docker-compose and entrypoint changes
             git fetch origin

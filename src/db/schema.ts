@@ -25,10 +25,12 @@ export const listings = pgTable("listings", {
 export const municipalities = pgTable("municipalities", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
+  email: text("email").unique(),
   region: text("region").notNull(),
   role: text("role").notNull().default("municipality"),
   username: text("username").notNull().unique(),
-  passwordHash: text("password_hash").notNull(),
+  passwordHash: text("password_hash"),
+  clerkId: text("clerk_id").unique(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull(),
 });
 

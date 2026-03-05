@@ -4,7 +4,7 @@ set -e
 # Local deployment script (for manual deploys without CI/CD)
 # Use this if you're not using GitHub Actions
 
-echo "🚀 Safe Haven Local Deployment"
+echo "🚀 The Haven Local Deployment"
 echo "==============================="
 echo ""
 

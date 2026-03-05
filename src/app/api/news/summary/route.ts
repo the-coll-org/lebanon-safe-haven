@@ -11,7 +11,7 @@ const cache = new Map<string, { data: CacheEntry; expiry: number }>();
 
 async function fetchFeedItems(): Promise<FeedItem[]> {
   const res = await fetch(UPSTREAM_URL, {
-    headers: { "User-Agent": "SafeHaven/1.0" },
+    headers: { "User-Agent": "TheHaven/1.0" },
     signal: AbortSignal.timeout(15_000),
   });
 

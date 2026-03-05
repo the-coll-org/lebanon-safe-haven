@@ -12,7 +12,7 @@ const SIZE_LABELS: Record<FontSize, string> = {
   xlarge: "XL",
 };
 
-const STORAGE_KEY = "safehaven-news-font";
+const STORAGE_KEY = "thehaven-news-font";
 let fontSize: FontSize = "medium";
 const listeners = new Set<() => void>();
 

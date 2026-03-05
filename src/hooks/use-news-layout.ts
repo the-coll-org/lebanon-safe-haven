@@ -4,7 +4,7 @@ import { useCallback, useSyncExternalStore } from "react";
 
 type Layout = "grid" | "list";
 
-const STORAGE_KEY = "safehaven-news-layout";
+const STORAGE_KEY = "thehaven-news-layout";
 let layout: Layout = "grid";
 const listeners = new Set<() => void>();
 

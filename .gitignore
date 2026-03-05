@@ -47,3 +47,6 @@ sqlite.db-wal
 sqlite.db-shm
 
 /.idea/
+
+# clerk configuration (can include secrets)
+/.clerk/

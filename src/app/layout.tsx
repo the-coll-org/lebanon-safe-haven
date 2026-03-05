@@ -29,7 +29,7 @@ const notoArabic = Noto_Sans_Arabic({
 });
 
 export const metadata: Metadata = {
-  title: "Safe Haven | ملاذ آمن",
+  title: "The Haven",
   description:
     "Connecting displaced people with available shelter. نربط النازحين بأماكن الإيواء المتاحة.",
 };
