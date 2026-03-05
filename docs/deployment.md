@@ -18,7 +18,7 @@ Copy `.example.env` to `.env.local` (dev) or `.env` (Docker).
 | `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Clerk publishable key (starts with `pk_`) |
 | `CLERK_SECRET_KEY` | Clerk secret key (starts with `sk_`) |
 | `CLERK_WEBHOOK_SECRET` | Svix webhook signing secret (starts with `whsec_`) |
-| `ALLOWED_ADMIN_EMAILS` | Comma-separated list of emails allowed to access the admin panel |
+| `ADMIN_EMAILS` | Region-scoped admin emails. Format: `email:region,email:region` (e.g. `ngo@org.lb:south_lebanon`) |
 
 ### Optional
 
@@ -64,8 +64,8 @@ docker compose exec -T db psql -U safehaven safehaven < backup.sql
 
 | Measure | Detail |
 |---------|--------|
-| Admin auth | Clerk (OAuth/email), whitelisted emails only |
-| Phone encryption | AES-256-GCM at rest |
+| Admin auth | Clerk (OAuth/email). Superadmins via DB seed; org admins via `ADMIN_EMAILS` env var |
+| Phone encryption | AES-256-GCM at rest (app refuses to start without key in production) |
 | Login brute-force | Clerk handles rate limiting |
 | Listing spam | 10 creates / hour per IP |
 | Flag abuse | 10 flags / hour per IP |

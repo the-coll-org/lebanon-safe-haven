@@ -6,8 +6,8 @@ function getKey(): Buffer | null {
   const raw = process.env.ENCRYPTION_KEY;
   if (!raw) {
     if (process.env.NODE_ENV === "production") {
-      console.warn(
-        "[SECURITY] ENCRYPTION_KEY is not set. Phone numbers are stored in plaintext. " +
+      throw new Error(
+        "[SECURITY] ENCRYPTION_KEY is not set. Refusing to store plaintext phone numbers in production. " +
         "Generate one with: node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\""
       );
     }
@@ -18,7 +18,7 @@ function getKey(): Buffer | null {
 
 export function encryptPhone(phone: string): string {
   const key = getKey();
-  if (!key) return phone; // No key = store plaintext
+  if (!key) return phone; // Dev only — production throws above
 
   const iv = randomBytes(12);
   const cipher = createCipheriv(ALGORITHM, key, iv);

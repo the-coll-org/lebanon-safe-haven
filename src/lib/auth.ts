@@ -12,13 +12,28 @@ export interface SessionUser {
   username: string;
 }
 
-export function isEmailWhitelisted(email: string): boolean {
-  const allowedEmails = (process.env.ALLOWED_ADMIN_EMAILS || "")
+/**
+ * Parse ADMIN_EMAILS env var.
+ * Format: "email:region,email:region" (e.g. "ngo@org.lb:south_lebanon,vol@org.lb:beirut")
+ */
+function getAdminEmailEntries(): Array<{ email: string; region: string }> {
+  return (process.env.ADMIN_EMAILS || "")
     .split(",")
-    .map((e) => e.trim().toLowerCase())
-    .filter(Boolean);
+    .map((entry) => entry.trim())
+    .filter(Boolean)
+    .map((entry) => {
+      const [email, region] = entry.split(":");
+      return { email: email.trim().toLowerCase(), region: region?.trim() || "all" };
+    });
+}
 
-  return allowedEmails.includes(email.toLowerCase());
+/**
+ * Check if an email is authorized for admin access.
+ * Returns the matching env entry if found in ADMIN_EMAILS.
+ */
+export function getAdminEmailEntry(email: string): { email: string; region: string } | null {
+  const entries = getAdminEmailEntries();
+  return entries.find((e) => e.email === email.toLowerCase()) || null;
 }
 
 export async function getSession(): Promise<SessionUser | null> {
@@ -49,20 +64,24 @@ export async function getSession(): Promise<SessionUser | null> {
   }
 }
 
+/**
+ * Sync a Clerk-authenticated user to the database.
+ * - If user exists by clerkId: return them
+ * - If user exists by email (seeded superadmin / CLI-created): link their Clerk account
+ * - If email is in ADMIN_EMAILS: create with the env-specified region and "admin" role
+ * - Otherwise: return null (not authorized — will show "not whitelisted" message)
+ */
 export async function syncUserWithDatabase(): Promise<SessionUser | null> {
   try {
     const clerkUser = await currentUser();
     if (!clerkUser) return null;
 
-    // Find the primary email using primary_email_address_id
     const primaryEmail = clerkUser.emailAddresses.find(
       (e) => e.id === clerkUser.primaryEmailAddressId
     )?.emailAddress;
     if (!primaryEmail) return null;
 
-    if (!isEmailWhitelisted(primaryEmail)) return null;
-
-    // Check if user already exists by clerkId
+    // Already linked by clerkId?
     const byClerkId = await db
       .select()
       .from(municipalities)
@@ -74,18 +93,18 @@ export async function syncUserWithDatabase(): Promise<SessionUser | null> {
       return { id: u.id, name: u.name, email: u.email, region: u.region, role: u.role, username: u.username };
     }
 
-    // Check if user exists by email (legacy account migration)
-    const byEmail = await db
-      .select()
-      .from(municipalities)
-      .where(eq(municipalities.email, primaryEmail))
-      .limit(1);
-
     const name = `${clerkUser.firstName || ""} ${clerkUser.lastName || ""}`.trim() ||
       primaryEmail.split("@")[0];
 
+    // Check DB by email (seeded superadmin, CLI-created admin)
+    const byEmail = await db
+      .select()
+      .from(municipalities)
+      .where(eq(municipalities.email, primaryEmail.toLowerCase()))
+      .limit(1);
+
     if (byEmail[0]) {
-      // Link existing account to Clerk
+      // Link existing DB account to Clerk
       await db
         .update(municipalities)
         .set({ clerkId: clerkUser.id, name })
@@ -95,23 +114,29 @@ export async function syncUserWithDatabase(): Promise<SessionUser | null> {
       return { id: u.id, name, email: u.email, region: u.region, role: u.role, username: u.username };
     }
 
-    // Create new superadmin user
-    const { v4: uuidv4 } = await import("uuid");
-    const username = primaryEmail.split("@")[0];
+    // Check ADMIN_EMAILS env var
+    const envEntry = getAdminEmailEntry(primaryEmail);
+    if (envEntry) {
+      const { v4: uuidv4 } = await import("uuid");
+      const id = uuidv4();
+      const username = primaryEmail.split("@")[0];
 
-    const id = uuidv4();
-    await db.insert(municipalities).values({
-      id,
-      name,
-      email: primaryEmail,
-      username,
-      region: "all",
-      role: "superadmin",
-      clerkId: clerkUser.id,
-      createdAt: new Date(),
-    });
+      await db.insert(municipalities).values({
+        id,
+        name,
+        email: primaryEmail.toLowerCase(),
+        username,
+        region: envEntry.region,
+        role: "admin",
+        clerkId: clerkUser.id,
+        createdAt: new Date(),
+      });
 
-    return { id, name, email: primaryEmail, region: "all", role: "superadmin", username };
+      return { id, name, email: primaryEmail, region: envEntry.region, role: "admin", username };
+    }
+
+    // Not authorized — email not in DB and not in ADMIN_EMAILS
+    return null;
   } catch (error) {
     console.error("[auth] syncUserWithDatabase failed:", error);
     return null;

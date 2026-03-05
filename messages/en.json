@@ -127,7 +127,8 @@
     "visitWebsite": "Visit Website"
   },
   "admin": {
-    "loginTitle": "Municipality Login",
+    "loginTitle": "Admin Login",
+    "accessDenied": "Access Denied",
     "signInWithGoogle": "Sign in with Google",
     "signingIn": "Signing in...",
     "oauthError": "An error occurred during sign in",

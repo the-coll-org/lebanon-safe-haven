@@ -13,21 +13,27 @@ Both roles can manage listings (shelter, food, appliances, clothing).
 
 ## Authentication
 
-Admin login uses [Clerk](https://clerk.com). Only emails listed in the `ALLOWED_ADMIN_EMAILS` environment variable can access the dashboard.
+Admin login uses [Clerk](https://clerk.com). Two types of admin accounts:
+
+- **Superadmins** — created via `npm run db:seed` (first deploy) or CLI. Full platform access, all regions.
+- **Org admins** — added via `ADMIN_EMAILS` env var with a region. Scoped to their assigned region.
+
+Non-authorized users who sign in via Clerk see an "Access Denied" message.
 
 ### First-Time Setup
 
 1. Create a Clerk application at [clerk.com](https://clerk.com)
 2. Set environment variables (see [deployment docs](deployment.md))
-3. Add admin emails to `ALLOWED_ADMIN_EMAILS`
-4. Configure a Clerk webhook pointing to `https://yourdomain.com/api/webhooks/clerk` with the `user.created`, `user.updated`, and `user.deleted` events
-5. Navigate to `/admin/login` and sign in
+3. Run `npm run db:seed` to create the initial superadmin (save the printed password — it's the superadmin's email for Clerk linking)
+4. Add org admin emails to `ADMIN_EMAILS` in your `.env`: `ngo@org.lb:south_lebanon,vol@org.lb:beirut`
+5. Configure a Clerk webhook pointing to `https://yourdomain.com/api/webhooks/clerk` with the `user.created`, `user.updated`, and `user.deleted` events
+6. Navigate to `/admin/login` and sign in
 
-When a whitelisted user signs in for the first time, they're automatically synced to the database via the webhook (or on first dashboard visit as a fallback).
+When an authorized user signs in for the first time, they're automatically synced to the database via the webhook (or on first dashboard visit as a fallback).
 
-### Legacy Password Accounts
+### Linking Seeded Accounts
 
-Existing accounts created via `npm run db:seed` or `npx tsx src/db/add-admin.ts` remain in the database. To migrate them to Clerk, ensure their email is whitelisted — they'll be linked automatically when they sign in with the same email.
+Superadmins created via `npm run db:seed` or `npx tsx src/db/add-admin.ts` need an `email` field in the database matching their Clerk email. When they sign in with the same email, their Clerk account is linked automatically.
 
 ## Dashboard
 
@@ -102,8 +108,8 @@ npx tsx src/db/add-admin.ts tyre_admin "Tyre Municipality" south_lebanon
 
 ## Troubleshooting
 
-**Can't sign in**: Ensure your email is in `ALLOWED_ADMIN_EMAILS` and your Clerk application is configured.
+**Can't sign in**: Ensure your Clerk application is configured and your email is either in the database (superadmin) or in `ADMIN_EMAILS` env var.
 
-**Signed in but redirected to login**: Your email may not be whitelisted, or the Clerk webhook hasn't synced your account yet. Check server logs.
+**"Access Denied" after sign in**: Your email is not authorized. Superadmins must be seeded in the DB; org admins must be in `ADMIN_EMAILS`. Check server logs for `[auth]` messages.
 
 **CSV import errors**: Use exact region codes (lowercase with underscores). Phone must be 8 digits. Capacity must be 1-10000.

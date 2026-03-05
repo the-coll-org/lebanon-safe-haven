@@ -127,7 +127,8 @@
     "visitWebsite": "زيارة الموقع"
   },
   "admin": {
-    "loginTitle": "تسجيل دخول البلدية",
+    "loginTitle": "تسجيل دخول المسؤول",
+    "accessDenied": "الوصول مرفوض",
     "signInWithGoogle": "تسجيل الدخول بحساب Google",
     "signingIn": "جاري تسجيل الدخول...",
     "oauthError": "حدث خطأ أثناء تسجيل الدخول",
