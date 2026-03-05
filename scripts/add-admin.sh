@@ -21,7 +21,7 @@ echo "==> Adding admin user: $USERNAME"
 
 # Run the add-admin script in a temporary container
 docker run --rm \
-    --network lebanon-safe-haven_default \
+    --network the-haven_default \
     -v "$(pwd):/app" \
     -e DATABASE_URL="postgres://safehaven:safehaven@db:5432/safehaven" \
     -w /app \

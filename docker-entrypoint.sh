@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-echo "==> Safe Haven startup"
+echo "==> The Haven startup"
 
 # Wait for PostgreSQL to be ready
 echo "==> Waiting for PostgreSQL..."

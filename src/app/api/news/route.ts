@@ -2,7 +2,7 @@ const UPSTREAM_URL = "https://lebmonitor.com/api/feeds";
 
 export async function GET() {
   const upstream = await fetch(UPSTREAM_URL, {
-    headers: { "User-Agent": "SafeHaven/1.0" },
+    headers: { "User-Agent": "TheHaven/1.0" },
   });
 
   if (!upstream.ok || !upstream.body) {

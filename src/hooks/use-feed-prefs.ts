@@ -7,7 +7,7 @@ interface FeedPrefs {
   hidden: Set<string>;
 }
 
-const STORAGE_KEY = "safehaven-feed-prefs";
+const STORAGE_KEY = "thehaven-feed-prefs";
 
 let prefs: FeedPrefs = { order: [], hidden: new Set() };
 const listeners = new Set<() => void>();

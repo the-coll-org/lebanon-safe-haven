@@ -23,7 +23,7 @@ docker compose exec db pg_isready -U safehaven -d safehaven
 # Create a temporary container to run the migration
 echo "==> Running migration..."
 docker run --rm \
-    --network lebanon-safe-haven_default \
+    --network the-haven_default \
     -v "$(pwd):/app" \
     -v "$(pwd)/data:/data" \
     -e DATABASE_URL="postgres://safehaven:safehaven@db:5432/safehaven" \

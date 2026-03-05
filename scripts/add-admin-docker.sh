@@ -27,7 +27,7 @@ fi
 
 # Run the admin creation using the pre-installed dependencies
 docker run --rm \
-    --network lebanon-safe-haven_default \
+    --network the-haven_default \
     -v "$(pwd):/app" \
     -v "$(pwd)/.admin-deps/node_modules:/app/node_modules" \
     -v "$(pwd)/.admin-deps/package.json:/app/package.json" \

@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getSession } from "@/lib/auth";
+import { getSession, syncUserWithDatabase } from "@/lib/auth";
 import type { ReactNode } from "react";
 
 export default async function AdminDashboardLayout({
@@ -9,11 +9,18 @@ export default async function AdminDashboardLayout({
   children: ReactNode;
   params: Promise<{ locale: string }>;
 }) {
-  const session = await getSession();
   const { locale } = await params;
 
+  // getSession already calls auth() internally — one Clerk call
+  let session = await getSession();
+
   if (!session) {
-    redirect(`/${locale}/admin/login`);
+    // User authenticated with Clerk but not yet in our DB — try sync
+    session = await syncUserWithDatabase();
+
+    if (!session) {
+      redirect(`/${locale}/admin/login`);
+    }
   }
 
   return <>{children}</>;

@@ -1,117 +1,117 @@
-import { cookies } from "next/headers";
-import crypto from "crypto";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { db } from "@/db";
 import { municipalities } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import bcrypt from "bcryptjs";
 
-const SESSION_COOKIE = "admin_session";
-const SESSION_MAX_AGE = 60 * 60 * 24; // 24 hours
-
-// HMAC secret: use env var in production, fallback for dev only
-const HMAC_SECRET =
-  process.env.SESSION_SECRET || "dev-only-change-in-production";
-
-function signPayload(payload: string): string {
-  const sig = crypto
-    .createHmac("sha256", HMAC_SECRET)
-    .update(payload)
-    .digest("hex");
-  return `${payload}.${sig}`;
+export interface SessionUser {
+  id: string;
+  name: string;
+  email: string | null;
+  region: string;
+  role: string;
+  username: string;
 }
 
-function verifySignedPayload(signed: string): string | null {
-  const lastDot = signed.lastIndexOf(".");
-  if (lastDot === -1) return null;
+export function isEmailWhitelisted(email: string): boolean {
+  const allowedEmails = (process.env.ALLOWED_ADMIN_EMAILS || "")
+    .split(",")
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean);
 
-  const payload = signed.slice(0, lastDot);
-  const sig = signed.slice(lastDot + 1);
-
-  const expected = crypto
-    .createHmac("sha256", HMAC_SECRET)
-    .update(payload)
-    .digest("hex");
-
-  // Timing-safe comparison to prevent timing attacks
-  if (sig.length !== expected.length) return null;
-  const sigBuf = Buffer.from(sig, "hex");
-  const expectedBuf = Buffer.from(expected, "hex");
-  if (sigBuf.length !== expectedBuf.length) return null;
-  if (!crypto.timingSafeEqual(sigBuf, expectedBuf)) return null;
-
-  return payload;
+  return allowedEmails.includes(email.toLowerCase());
 }
 
-export async function authenticateAdmin(
-  username: string,
-  password: string
-) {
-  const result = await db
-    .select()
-    .from(municipalities)
-    .where(eq(municipalities.username, username))
-    .limit(1);
-  
-  const municipality = result[0];
-
-  if (!municipality) {
-    // Constant-time: still hash to prevent timing-based user enumeration
-    await bcrypt.hash("dummy", 10);
-    return null;
-  }
-
-  const valid = await bcrypt.compare(password, municipality.passwordHash);
-  if (!valid) return null;
-
-  return municipality;
-}
-
-export async function createSession(municipalityId: string) {
-  const payload = Buffer.from(
-    JSON.stringify({ id: municipalityId, ts: Date.now() })
-  ).toString("base64");
-
-  const signed = signPayload(payload);
-
-  (await cookies()).set(SESSION_COOKIE, signed, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
-    maxAge: SESSION_MAX_AGE,
-    path: "/",
-  });
-
-  return signed;
-}
-
-export async function getSession() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get(SESSION_COOKIE)?.value;
-  if (!token) return null;
-
+export async function getSession(): Promise<SessionUser | null> {
   try {
-    const payload = verifySignedPayload(token);
-    if (!payload) return null;
-
-    const data = JSON.parse(Buffer.from(payload, "base64").toString());
-
-    // Check session expiry
-    if (Date.now() - data.ts > SESSION_MAX_AGE * 1000) return null;
+    const { userId } = await auth();
+    if (!userId) return null;
 
     const result = await db
       .select()
       .from(municipalities)
-      .where(eq(municipalities.id, data.id))
+      .where(eq(municipalities.clerkId, userId))
       .limit(1);
-    
-    const municipality = result[0];
 
-    return municipality || null;
+    const user = result[0];
+    if (!user) return null;
+
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      region: user.region,
+      role: user.role,
+      username: user.username,
+    };
   } catch {
     return null;
   }
 }
 
-export async function clearSession() {
-  (await cookies()).delete(SESSION_COOKIE);
+export async function syncUserWithDatabase(): Promise<SessionUser | null> {
+  try {
+    const clerkUser = await currentUser();
+    if (!clerkUser) return null;
+
+    // Find the primary email using primary_email_address_id
+    const primaryEmail = clerkUser.emailAddresses.find(
+      (e) => e.id === clerkUser.primaryEmailAddressId
+    )?.emailAddress;
+    if (!primaryEmail) return null;
+
+    if (!isEmailWhitelisted(primaryEmail)) return null;
+
+    // Check if user already exists by clerkId
+    const byClerkId = await db
+      .select()
+      .from(municipalities)
+      .where(eq(municipalities.clerkId, clerkUser.id))
+      .limit(1);
+
+    if (byClerkId[0]) {
+      const u = byClerkId[0];
+      return { id: u.id, name: u.name, email: u.email, region: u.region, role: u.role, username: u.username };
+    }
+
+    // Check if user exists by email (legacy account migration)
+    const byEmail = await db
+      .select()
+      .from(municipalities)
+      .where(eq(municipalities.email, primaryEmail))
+      .limit(1);
+
+    const name = `${clerkUser.firstName || ""} ${clerkUser.lastName || ""}`.trim() ||
+      primaryEmail.split("@")[0];
+
+    if (byEmail[0]) {
+      // Link existing account to Clerk
+      await db
+        .update(municipalities)
+        .set({ clerkId: clerkUser.id, name })
+        .where(eq(municipalities.id, byEmail[0].id));
+
+      const u = byEmail[0];
+      return { id: u.id, name, email: u.email, region: u.region, role: u.role, username: u.username };
+    }
+
+    // Create new user
+    const { v4: uuidv4 } = await import("uuid");
+    const username = `${primaryEmail.split("@")[0]}_${Math.random().toString(36).slice(2, 6)}`;
+
+    const id = uuidv4();
+    await db.insert(municipalities).values({
+      id,
+      name,
+      email: primaryEmail,
+      username,
+      region: "all",
+      role: "municipality",
+      clerkId: clerkUser.id,
+      createdAt: new Date(),
+    });
+
+    return { id, name, email: primaryEmail, region: "all", role: "municipality", username };
+  } catch {
+    return null;
+  }
 }

@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "Safe Haven",
+    "appName": "The Haven",
     "tagline": "Connecting displaced people with available relief",
     "disclaimer": "IMPORTANT SECURITY NOTICE: This platform was quickly developed to connect people who need help with those who offer help. The platform has not been tested and hardened for security and data privacy. Do NOT share any information you are not comfortable sharing publicly. Any information you provide will be publicly available. Proceed with caution.",
     "loading": "Loading...",
@@ -110,7 +110,7 @@
     "editLinkNote": "You can also change your phone number later using this link.",
     "viewListing": "View Listing",
     "backHome": "Back to Home",
-    "whatsAppMessage": "Your Safe Haven edit link:\n{url}\n\n⚠️ Do NOT share this link with anyone. It is the only way to edit or remove your listing."
+    "whatsAppMessage": "Your The Haven edit link:\n{url}\n\n⚠️ Do NOT share this link with anyone. It is the only way to edit or remove your listing."
   },
   "hotlines": {
     "title": "Government Emergency Hotlines",
@@ -128,6 +128,12 @@
   },
   "admin": {
     "loginTitle": "Municipality Login",
+    "signInWithGoogle": "Sign in with Google",
+    "signingIn": "Signing in...",
+    "oauthError": "An error occurred during sign in",
+    "emailNotVerified": "Your email must be verified",
+    "notWhitelisted": "This email is not authorized to access the admin panel",
+    "oauthNotConfigured": "Authentication is not configured yet",
     "username": "Username",
     "password": "Password",
     "login": "Sign In",

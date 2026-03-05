@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
+import { ClerkProvider } from "@clerk/nextjs";
 import { Toaster } from "@/components/ui/sonner";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
@@ -23,13 +24,15 @@ export default async function LocaleLayout({
   const messages = await getMessages({ locale });
 
   return (
-    <NextIntlClientProvider locale={locale} messages={messages}>
-      <LocaleProvider>
-        <Header />
-        <main className="flex-1">{children}</main>
-        <Footer />
-        <Toaster position={locale === "ar" ? "bottom-left" : "bottom-right"} />
-      </LocaleProvider>
-    </NextIntlClientProvider>
+    <ClerkProvider>
+      <NextIntlClientProvider locale={locale} messages={messages}>
+        <LocaleProvider>
+          <Header />
+          <main className="flex-1">{children}</main>
+          <Footer />
+          <Toaster position={locale === "ar" ? "bottom-left" : "bottom-right"} />
+        </LocaleProvider>
+      </NextIntlClientProvider>
+    </ClerkProvider>
   );
 }
