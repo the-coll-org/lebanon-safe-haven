@@ -25,6 +25,7 @@ export function Header() {
     { href: "/listings" as const, label: t("listings") },
     { href: "/map" as const, label: t("map") },
     { href: "/offer" as const, label: t("offer") },
+    { href: "/news" as const, label: t("news") },
     { href: "/hotlines" as const, label: t("hotlines") },
     { href: "/resources" as const, label: t("resources") },
     { href: "/feedback" as const, label: t("feedback") },

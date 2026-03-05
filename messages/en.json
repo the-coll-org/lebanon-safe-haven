@@ -24,6 +24,7 @@
     "map": "Map",
     "hotlines": "Hotlines",
     "resources": "Resources",
+    "news": "News",
     "admin": "Municipality",
     "feedback": "Feedback"
   },
@@ -326,5 +327,29 @@
     "submitting": "Submitting...",
     "success": "Feedback submitted successfully, thank you!",
     "error": "An error occurred while submitting feedback"
+  },
+  "news": {
+    "title": "Lebanon News Monitor",
+    "subtitle": "Real-time conflict & humanitarian news",
+    "allCategories": "All",
+    "war": "War & Conflict",
+    "breaking": "Breaking News",
+    "general": "General & Analysis",
+    "sources": "sources",
+    "articles": "articles",
+    "updated": "Updated",
+    "loading": "Loading feeds...",
+    "noResults": "No articles match your filters",
+    "clearFilter": "Clear",
+    "endOfFeed": "End of feed",
+    "loadingMore": "Loading more...",
+    "settings": "Feed Settings",
+    "sourcesActive": "{count} of {total} sources active",
+    "poweredBy": "Powered by LEB Monitor",
+    "fontSize": "Font size",
+    "layout": "Layout",
+    "aiOverview": "AI Situation Overview",
+    "summaryError": "Could not load summary",
+    "disclaimer": "This page aggregates publicly available information from authoritative sources. It is not a news outlet and does not produce original reporting. Always verify with official sources."
   }
 }
