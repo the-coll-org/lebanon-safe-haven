@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
+import { useClerk } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -45,6 +46,7 @@ export default function AdminDashboardPage() {
   const tcat = useTranslations("categories");
   const locale = useLocale();
   const router = useRouter();
+  const { signOut } = useClerk();
 
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
@@ -117,8 +119,7 @@ export default function AdminDashboardPage() {
   }
 
   async function handleLogout() {
-    await fetch("/api/admin/auth", { method: "DELETE" });
-    router.push("/admin/login");
+    await signOut({ redirectUrl: "/admin/login" });
   }
 
   function toggleSelection(id: string) {
