@@ -12,7 +12,6 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
-    "@clerk/nextjs": "^7.0.1",
     "bcryptjs": "^3.0.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -28,7 +27,6 @@
     "react-dom": "19.2.3",
     "react-leaflet": "^5.0.0",
     "sonner": "^2.0.7",
-    "svix": "^1.86.0",
     "tailwind-merge": "^3.5.0",
     "tsx": "^4.21.0",
     "uuid": "^13.0.0"
