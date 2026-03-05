@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Sparkles, RefreshCw, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 
 interface Summary {
   text: string;
@@ -12,6 +12,7 @@ interface Summary {
 
 export function FeedOverview() {
   const t = useTranslations("news");
+  const locale = useLocale();
   const [summary, setSummary] = useState<Summary | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -20,7 +21,7 @@ export function FeedOverview() {
     setIsLoading(true);
     setError(false);
     try {
-      const res = await fetch("/api/news/summary");
+      const res = await fetch(`/api/news/summary?lang=${locale}`);
       if (!res.ok) throw new Error();
       const data = await res.json();
       if (data.text) setSummary(data);
@@ -34,7 +35,7 @@ export function FeedOverview() {
 
   useEffect(() => {
     fetchSummary();
-  }, []);
+  }, [locale]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (error && !summary) return null;
 

@@ -1,3 +1,4 @@
+import type { NextRequest } from "next/server";
 import type { FeedItem, StreamMessage } from "@/lib/news-types";
 
 const UPSTREAM_URL = "https://lebmonitor.com/api/feeds";
@@ -5,8 +6,8 @@ const GEMINI_MODEL = "gemini-2.5-flash-lite";
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 const CACHE_TTL = 60 * 60 * 1000; // 1 hour
 
-let cachedSummary: { text: string; generatedAt: string } | null = null;
-let cacheExpiry = 0;
+type CacheEntry = { text: string; generatedAt: string };
+const cache = new Map<string, { data: CacheEntry; expiry: number }>();
 
 async function fetchFeedItems(): Promise<FeedItem[]> {
   const res = await fetch(UPSTREAM_URL, {
@@ -29,14 +30,16 @@ async function fetchFeedItems(): Promise<FeedItem[]> {
     }
   }
 
-  // Sort by date, take top 40
   items.sort(
     (a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime()
   );
   return items.slice(0, 40);
 }
 
-async function generateSummary(items: FeedItem[]): Promise<string> {
+async function generateSummary(
+  items: FeedItem[],
+  lang: string
+): Promise<string> {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) throw new Error("GEMINI_API_KEY not set");
 
@@ -47,7 +50,12 @@ async function generateSummary(items: FeedItem[]): Promise<string> {
     )
     .join("\n");
 
-  const prompt = `Below are the latest ${items.length} headlines from Lebanese news sources. Write 3-4 bullet points summarizing the current situation. One sentence per bullet. Factual and neutral. English only.
+  const langInstruction =
+    lang === "ar"
+      ? "Write in Arabic (العربية). Use formal Modern Standard Arabic."
+      : "Write in English.";
+
+  const prompt = `Below are the latest ${items.length} headlines from Lebanese news sources. Write 3-4 bullet points summarizing the current situation. One sentence per bullet. Factual and neutral. ${langInstruction}
 
 ${headlines}`;
 
@@ -75,12 +83,15 @@ ${headlines}`;
   return text;
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const lang = request.nextUrl.searchParams.get("lang") === "ar" ? "ar" : "en";
+
   // Return cached if fresh
-  if (cachedSummary && Date.now() < cacheExpiry) {
-    return Response.json(cachedSummary, {
+  const cached = cache.get(lang);
+  if (cached && Date.now() < cached.expiry) {
+    return Response.json(cached.data, {
       headers: {
-        "Cache-Control": `public, max-age=${Math.floor((cacheExpiry - Date.now()) / 1000)}`,
+        "Cache-Control": `public, max-age=${Math.floor((cached.expiry - Date.now()) / 1000)}`,
       },
     });
   }
@@ -89,26 +100,32 @@ export async function GET() {
     const items = await fetchFeedItems();
     if (items.length === 0) {
       return Response.json(
-        { text: "No recent headlines available.", generatedAt: new Date().toISOString() },
+        {
+          text:
+            lang === "ar"
+              ? "لا تتوفر عناوين حديثة."
+              : "No recent headlines available.",
+          generatedAt: new Date().toISOString(),
+        },
         { status: 200 }
       );
     }
 
-    const text = await generateSummary(items);
+    const text = await generateSummary(items, lang);
     const generatedAt = new Date().toISOString();
+    const data: CacheEntry = { text, generatedAt };
 
-    cachedSummary = { text, generatedAt };
-    cacheExpiry = Date.now() + CACHE_TTL;
+    cache.set(lang, { data, expiry: Date.now() + CACHE_TTL });
 
-    return Response.json(cachedSummary, {
+    return Response.json(data, {
       headers: { "Cache-Control": "public, max-age=3600" },
     });
   } catch (err) {
     console.error("News summary error:", err);
 
     // Return stale cache if available
-    if (cachedSummary) {
-      return Response.json(cachedSummary, {
+    if (cached) {
+      return Response.json(cached.data, {
         headers: { "Cache-Control": "public, max-age=60" },
       });
     }
