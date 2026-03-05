@@ -5,7 +5,7 @@ import { db } from "@/db";
 import { municipalities } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
-import { isEmailWhitelisted } from "@/lib/auth";
+import { getAdminEmailEntry } from "@/lib/auth";
 
 const CLERK_WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET;
 
@@ -62,7 +62,6 @@ export async function POST(request: NextRequest) {
   if (event.type === "user.created" || event.type === "user.updated") {
     const { id, email_addresses, first_name, last_name, primary_email_address_id } = event.data;
 
-    // Find the actual primary email using primary_email_address_id
     const primaryEmail = email_addresses.find(
       (e) => e.id === primary_email_address_id
     )?.email_address;
@@ -71,37 +70,39 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No primary email found" }, { status: 400 });
     }
 
-    if (!isEmailWhitelisted(primaryEmail)) {
-      return NextResponse.json({ error: "Email not whitelisted" }, { status: 403 });
-    }
-
     const name = `${first_name || ""} ${last_name || ""}`.trim() ||
       primaryEmail.split("@")[0];
 
+    // Check if user exists in DB (seeded superadmin, CLI-created)
     const existingUser = await db
       .select()
       .from(municipalities)
-      .where(eq(municipalities.email, primaryEmail))
+      .where(eq(municipalities.email, primaryEmail.toLowerCase()))
       .limit(1);
 
     if (existingUser[0]) {
+      // Link existing account to Clerk
       await db
         .update(municipalities)
         .set({ name, clerkId: id })
         .where(eq(municipalities.id, existingUser[0].id));
     } else {
-      const username = `${primaryEmail.split("@")[0]}_${Math.random().toString(36).slice(2, 6)}`;
-
-      await db.insert(municipalities).values({
-        id: uuidv4(),
-        name,
-        email: primaryEmail,
-        username,
-        region: "all",
-        role: "municipality",
-        clerkId: id,
-        createdAt: new Date(),
-      });
+      // Check ADMIN_EMAILS env var
+      const envEntry = getAdminEmailEntry(primaryEmail);
+      if (envEntry) {
+        const username = primaryEmail.split("@")[0];
+        await db.insert(municipalities).values({
+          id: uuidv4(),
+          name,
+          email: primaryEmail.toLowerCase(),
+          username,
+          region: envEntry.region,
+          role: "admin",
+          clerkId: id,
+          createdAt: new Date(),
+        });
+      }
+      // If not in DB and not in ADMIN_EMAILS: do nothing (not authorized)
     }
   }
 

@@ -26,8 +26,12 @@ process.exit(0);
 " 2>/dev/null || echo "0")
 
 if [ "$SEED_COUNT" = "0" ]; then
-    echo "==> Seeding database — SAVE THE PASSWORDS PRINTED BELOW"
-    npm run db:seed
+    if [ -z "$SUPERADMIN_EMAIL" ]; then
+        echo "==> WARNING: No SUPERADMIN_EMAIL set. Skipping seed. Set SUPERADMIN_EMAIL to create the initial superadmin."
+    else
+        echo "==> Seeding database — SAVE THE CREDENTIALS PRINTED BELOW"
+        npx tsx src/db/seed.ts "$SUPERADMIN_EMAIL"
+    fi
 fi
 
 echo "==> Starting Next.js..."

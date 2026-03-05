@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
   const id = uuid();
   const now = new Date();
 
-  db.insert(feedback).values({
+  await db.insert(feedback).values({
     id,
     name: name ? String(name).slice(0, 100).trim() : null,
     email: email ? String(email).slice(0, 255).trim() : null,

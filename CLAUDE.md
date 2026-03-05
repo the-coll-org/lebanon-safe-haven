@@ -87,7 +87,7 @@ docs/
 - **No migrations directory**: Schema changes are applied directly via `drizzle-kit push`.
 - **Edit tokens (no user accounts)**: Listing creators get a UUID edit token instead of requiring registration.
 - **Locale-aware navigation**: Use `<Link>` from `@/i18n/navigation`, not from `next/link`.
-- **Clerk auth**: Admin panel uses Clerk. `getSession()` in `src/lib/auth.ts` calls `auth()` once, looks up user by `clerkId`. `syncUserWithDatabase()` handles first-login provisioning for whitelisted emails.
+- **Clerk auth**: Admin panel uses Clerk. Superadmins are DB-seeded; org admins come from `ADMIN_EMAILS` env var (`email:region` format). `getSession()` looks up by `clerkId`. `syncUserWithDatabase()` handles first-login provisioning. Non-authorized users see "Access Denied".
 - **News proxy**: `/api/news` streams NDJSON from lebmonitor.com. `/api/news/summary` caches AI summaries per locale (1hr TTL).
 
 ## Database Schema (6 tables)
@@ -115,7 +115,7 @@ docs/
 - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` - Clerk publishable key
 - `CLERK_SECRET_KEY` - Clerk secret key
 - `CLERK_WEBHOOK_SECRET` - Svix webhook signing secret
-- `ALLOWED_ADMIN_EMAILS` - Comma-separated admin email whitelist
+- `ADMIN_EMAILS` - Region-scoped admin emails (format: `email:region,email:region`)
 - `GEMINI_API_KEY` - Google Gemini API key for AI news summary
 - `NODE_ENV` - Set to `production` in Docker
 

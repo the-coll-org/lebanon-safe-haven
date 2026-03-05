@@ -13,7 +13,7 @@ npm install
 cp .example.env .env.local        # fill in values (see docs/deployment.md)
 docker compose up -d db           # start PostgreSQL
 npx drizzle-kit push              # create tables
-npm run db:seed                   # create admin accounts — save the printed passwords!
+npx tsx src/db/seed.ts you@email.com  # create superadmin — use your Clerk email
 npm run dev                       # http://localhost:3000
 ```
 
@@ -69,7 +69,7 @@ npm run build        # Production build
 npm run start        # Start built app
 npm run lint         # ESLint
 npm run db:push      # Push schema to PostgreSQL
-npm run db:seed      # Seed admin accounts
+npm run db:seed      # Seed superadmin (requires email arg)
 npm run db:studio    # Drizzle Studio GUI
 ```
 

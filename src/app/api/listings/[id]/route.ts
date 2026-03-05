@@ -6,6 +6,7 @@ import { validateOrigin } from "@/lib/csrf";
 import { decryptPhone, encryptPhone } from "@/lib/crypto";
 import { handleConditionalRequest, CACHE_DURATIONS } from "@/lib/cache";
 import { revalidateListing } from "@/lib/revalidate";
+import { getSession } from "@/lib/auth";
 
 export async function GET(
   request: NextRequest,
@@ -19,16 +20,19 @@ export async function GET(
     return NextResponse.json({ error: "Listing not found" }, { status: 404 });
   }
 
-  // Decrypt phone, strip editToken from public response
-  const { editToken, ...safe } = listing; // eslint-disable-line @typescript-eslint/no-unused-vars
-  const responseData = { ...safe, phone: decryptPhone(listing.phone) };
+  const session = await getSession();
+  const { editToken, phone, ...safe } = listing; // eslint-disable-line @typescript-eslint/no-unused-vars
+  // Only admins see decrypted phone; public gets no phone
+  const responseData = session
+    ? { ...safe, phone: decryptPhone(listing.phone) }
+    : safe;
 
   // Cache individual listing for 1 minute with stale-while-revalidate
   return handleConditionalRequest(
     request,
     responseData,
     CACHE_DURATIONS.LISTINGS,
-    { staleWhileRevalidate: 600 } // Allow stale data for 10 minutes while revalidating
+    { staleWhileRevalidate: 600 }
   );
 }
 
@@ -113,6 +117,9 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const csrf = validateOrigin(request);
+  if (csrf) return csrf;
+
   const { id } = await params;
   const { searchParams } = request.nextUrl;
   const editToken = searchParams.get("editToken");

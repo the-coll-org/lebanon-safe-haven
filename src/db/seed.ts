@@ -25,23 +25,32 @@ function generatePassword(): string {
 }
 
 async function seed() {
+  const superAdminEmail = process.argv[2];
+  if (!superAdminEmail || !superAdminEmail.includes("@")) {
+    console.error("Usage: npx tsx src/db/seed.ts <superadmin-email>");
+    console.error("Example: npx tsx src/db/seed.ts admin@thecoll.org");
+    process.exit(1);
+  }
+
   console.log("Seeding database...\n");
 
-  // Super-admin (platform-wide, not tied to a specific region)
+  // Super-admin (platform-wide access, all regions)
   const superAdminPassword = generatePassword();
   const superAdminHash = await bcrypt.hash(superAdminPassword, 10);
   await db.insert(municipalities).values({
     id: uuid(),
     name: "Platform Admin",
-    region: "beirut", // placeholder
+    email: superAdminEmail.toLowerCase(),
+    region: "all",
     role: "superadmin",
     username: "admin",
     passwordHash: superAdminHash,
     createdAt: new Date(),
   });
   console.log(`  Super admin created:`);
+  console.log(`    Email: ${superAdminEmail}`);
   console.log(`    Username: admin`);
-  console.log(`    Password: ${superAdminPassword}`);
+  console.log(`    Password: ${superAdminPassword} (legacy — use Clerk to sign in)`);
   console.log();
 
   // Municipality accounts — one per region

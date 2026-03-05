@@ -108,8 +108,8 @@ export async function PATCH(
 
   if (body.capacity !== undefined) {
     const cap = Number(body.capacity);
-    if (!Number.isInteger(cap) || cap < 1) {
-      return NextResponse.json({ error: "Invalid capacity" }, { status: 400 });
+    if (!Number.isInteger(cap) || cap < 1 || cap > 10000) {
+      return NextResponse.json({ error: "Invalid capacity (must be 1-10000)" }, { status: 400 });
     }
     updates.capacity = cap;
   }
@@ -144,11 +144,11 @@ export async function PATCH(
   }
 
   if (body.area !== undefined) {
-    updates.area = body.area ? String(body.area).trim() : null;
+    updates.area = body.area ? String(body.area).slice(0, 200).trim() : null;
   }
 
   if (body.description !== undefined) {
-    updates.description = body.description ? String(body.description).trim() : null;
+    updates.description = body.description ? String(body.description).slice(0, 1000).trim() : null;
   }
 
   if (Object.keys(updates).length === 0) {
